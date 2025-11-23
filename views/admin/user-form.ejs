@@ -1,0 +1,41 @@
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><%= user ? 'Edit User' : 'Add New User' %></h4>
+        </div>
+        <div class="card-body p-5">
+            <% if (error_msg) { %>
+                <div class="alert alert-danger mb-4"><%= error_msg %></div>
+            <% } %>
+            <form action="<%= user ? '/admin/users/edit/' + user._id : '/admin/users/add' %>" method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">Full Name</label>
+                    <input type="text" class="form-control form-control-lg" id="name" name="name" value="<%= user ? user.name : '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-bold">Email Address</label>
+                    <input type="email" class="form-control form-control-lg" id="email" name="email" value="<%= user ? user.email : '' %>" required>
+                </div>
+                <% if (!user) { %>
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-bold">Password</label>
+                        <input type="password" class="form-control form-control-lg" id="password" name="password" required>
+                    </div>
+                <% } %>
+                <div class="mb-3">
+                    <label for="role" class="form-label fw-bold">User Role</label>
+                    <select class="form-select form-select-lg" id="role" name="role" required>
+                        <option value="user" <%= user && user.role === 'user' ? 'selected' : '' %>>Regular User</option>
+                        <option value="admin" <%= user && user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-3 mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                        <%= user ? 'Update User' : 'Create User' %>
+                    </button>
+                    <a href="/admin/users" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

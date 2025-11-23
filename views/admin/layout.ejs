@@ -34,8 +34,13 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <img src="https://via.placeholder.com/32x32/6c757d/ffffff?text=<%= (user && user.name ? encodeURIComponent(user.name.charAt(0)) : 'A') %>" alt="Profile" class="rounded-circle me-2" width="32" height="32">
-                            <%= (user && user.name) ? user.name : 'Admin' %>
+                            <% if (user && user.name) { %>
+                                <img src="/admin/placeholder-avatar/<%= user.name.charAt(0) %>?size=32&bgColor=6c757d&textColor=ffffff" alt="User Avatar" class="rounded-circle" width="32" height="32">
+                                <%= user.name %>
+                            <% } else { %>
+                                <img src="/admin/placeholder-avatar/A?size=32&bgColor=6c757d&textColor=ffffff" alt="Admin Avatar" class="rounded-circle" width="32" height="32">
+                                Admin
+                            <% } %>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user me-2"></i>Profile</a></li>

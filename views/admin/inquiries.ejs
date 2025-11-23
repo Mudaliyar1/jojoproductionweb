@@ -70,6 +70,9 @@
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Inquiry Management</h6>
         <div class="d-flex">
+            <button id="bulkDeleteBtn" class="btn btn-danger btn-sm me-2" style="display: none;">
+                <i class="fas fa-trash me-1"></i>Bulk Delete
+            </button>
             <button class="btn btn-outline-primary btn-sm me-2" onclick="exportInquiries()">
                 <i class="fas fa-download me-1"></i>Export
             </button>
@@ -84,6 +87,7 @@
                 <table class="table table-hover" id="inquiriesTable">
                     <thead>
                         <tr>
+                            <th><input type="checkbox" id="selectAllInquiries"></th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
@@ -99,6 +103,7 @@
                     <tbody>
                         <% inquiries.forEach(inquiry => { %>
                             <tr>
+                                <td><input type="checkbox" class="inquiry-checkbox" value="<%= inquiry._id %>"></td>
                                 <td>
                                     <div class="fw-bold"><%= inquiry.firstName %> <%= inquiry.lastName %></div>
                                     <% if (inquiry.newsletter) { %>
@@ -116,8 +121,8 @@
                                 </td>
                                 <td><%= inquiry.howTheyHeard %></td>
                                 <td>
-                                    <span class="badge <%= inquiry.status === 'new' ? 'bg-warning text-dark' : inquiry.status === 'contacted' ? 'bg-info' : 'bg-success' %>">
-                                        <%= inquiry.status %>
+                                    <span class="badge bg-<%= inquiry.status === 'pending' ? 'warning' : inquiry.status === 'in_progress' ? 'info' : inquiry.status === 'accepted' ? 'success' : inquiry.status === 'rejected' ? 'danger' : inquiry.status === 'responded' ? 'primary' : inquiry.status === 'viewed' ? 'secondary' : 'secondary' %>">
+                                        <%= inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1) %>
                                     </span>
                                 </td>
                                 <td><%= inquiry.createdAt.toLocaleDateString() %></td>
@@ -129,9 +134,9 @@
                                         <button type="button" class="btn btn-sm btn-outline-success" onclick="updateStatus('<%= inquiry._id %>', 'contacted')" title="Mark as Contacted">
                                             <i class="fas fa-phone"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteInquiry('<%= inquiry._id %>', '<%= inquiry.firstName %> <%= inquiry.lastName %>')" title="Delete">
+                                        <a href="/admin/inquiries/delete/<%= inquiry._id %>" class="btn btn-sm btn-outline-danger" title="Delete">
                                             <i class="fas fa-trash"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -196,45 +201,50 @@
     
     // View inquiry details
     function viewInquiry(inquiryId) {
-        currentInquiryId = inquiryId;
-        fetch(`/admin/inquiries/${inquiryId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const inquiry = data.inquiry;
-                    const modalBody = document.getElementById('inquiryModalBody');
-                    
-                    modalBody.innerHTML = `
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Contact Information</h6>
-                                <p><strong>Name:</strong> ${inquiry.firstName} ${inquiry.lastName}</p>
-                                <p><strong>Email:</strong> ${inquiry.email}</p>
-                                <p><strong>Phone:</strong> ${inquiry.phone}</p>
-                                <p><strong>Event Type:</strong> ${inquiry.eventType}</p>
-                                <p><strong>Event Date:</strong> ${new Date(inquiry.eventDate).toLocaleDateString()}</p>
-                                <p><strong>Location:</strong> ${inquiry.eventLocation}</p>
-                                <p><strong>How they heard:</strong> ${inquiry.howTheyHeard}</p>
-                                <p><strong>Status:</strong> <span class="badge ${inquiry.status === 'new' ? 'bg-warning text-dark' : inquiry.status === 'contacted' ? 'bg-info' : 'bg-success'}">${inquiry.status}</span></p>
-                                ${inquiry.newsletter ? '<p><span class="badge bg-success">Subscribed to newsletter</span></p>' : ''}
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Event Details</h6>
-                                <p><strong>Message:</strong></p>
-                                <p class="bg-light p-3 rounded">${inquiry.message}</p>
-                                <p><strong>Submitted:</strong> ${new Date(inquiry.createdAt).toLocaleString()}</p>
-                            </div>
-                        </div>
-                    `;
-                    
-                    new bootstrap.Modal(document.getElementById('inquiryModal')).show();
-                }
-            })
-            .catch(error => {
-                alert('Error loading inquiry details: ' + error.message);
-            });
+        window.location.href = `/admin/inquiries/${inquiryId}`;
     }
-    
+
+    // Bulk delete functionality
+    const selectAllInquiries = document.getElementById('selectAllInquiries');
+    const inquiryCheckboxes = document.querySelectorAll('.inquiry-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+
+    if (selectAllInquiries) {
+        selectAllInquiries.addEventListener('change', function() {
+            inquiryCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            toggleBulkDeleteButton();
+        });
+    }
+
+    inquiryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', toggleBulkDeleteButton);
+    });
+
+    function toggleBulkDeleteButton() {
+        const checkedCheckboxes = document.querySelectorAll('.inquiry-checkbox:checked');
+        if (checkedCheckboxes.length > 0) {
+            bulkDeleteBtn.style.display = 'block';
+        } else {
+            bulkDeleteBtn.style.display = 'none';
+        }
+    }
+
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', function() {
+            const selectedInquiryIds = Array.from(document.querySelectorAll('.inquiry-checkbox:checked'))
+                                            .map(checkbox => checkbox.value);
+            if (selectedInquiryIds.length > 0) {
+                // Redirect to a bulk delete confirmation page with selected IDs
+                window.location.href = `/admin/inquiries/bulk-delete-confirm?ids=${selectedInquiryIds.join(',')}`;
+            } else {
+                alert('Please select at least one inquiry to delete.');
+            }
+        });
+    }
+
+
     // Update inquiry status
     function updateStatus(inquiryId, status) {
         fetch(`/admin/inquiries/${inquiryId}/status`, {

@@ -10,10 +10,18 @@ const serviceSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    image: {
-        type: String,
-        required: true
-    },
+    images: [
+        {
+            type: String,
+            required: false
+        }
+    ],
+    videos: [
+        {
+            type: String,
+            required: false
+        }
+    ],
     featured: {
         type: Boolean,
         default: false

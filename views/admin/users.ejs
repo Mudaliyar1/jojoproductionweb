@@ -12,14 +12,13 @@
     <div class="card-body">
         <% if (users && users.length > 0) { %>
             <div class="table-responsive">
-                <table class="table table-hover" id="usersTable">
+                <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th>Avatar</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
-                            <th>Status</th>
-                            <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -27,37 +26,17 @@
                         <% users.forEach(user => { %>
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/40x40/6c757d/ffffff?text=<%= user.name.charAt(0) %>" 
-                                             alt="<%= user.name %>" class="rounded-circle me-3" width="40" height="40">
-                                        <div>
-                                            <div class="fw-bold"><%= user.name %></div>
-                                            <small class="text-muted">ID: <%= user._id %></small>
-                                        </div>
-                                    </div>
+                                    <img src="/admin/placeholder-avatar/<%= user.name.charAt(0) %>?size=40&bgColor=007bff&textColor=ffffff" alt="Avatar" class="rounded-circle" width="40" height="40">
                                 </td>
+                                <td><%= user.name %></td>
                                 <td><%= user.email %></td>
+                                <td><%= user.role %></td>
                                 <td>
-                                    <span class="badge <%= user.role === 'admin' ? 'bg-danger' : 'bg-primary' %>">
-                                        <%= user.role %>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">Active</span>
-                                </td>
-                                <td><%= user.createdAt.toLocaleDateString() %></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="/admin/users/<%= user._id %>/edit" class="btn btn-sm btn-outline-primary" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteUser('<%= user._id %>', '<%= user.name %>')" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
+                                    <a href="/admin/users/<%= user._id %>/edit" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="/admin/users/<%= user._id %>/delete" class="btn btn-sm btn-danger">Delete</a>
                                 </td>
                             </tr>
-                        <% }) %>
+                        <% }); %>
                     </tbody>
                 </table>
             </div>
@@ -128,4 +107,6 @@
             });
         }
     }
+    
+    // Remove the old deleteUser function if it exists
 </script>

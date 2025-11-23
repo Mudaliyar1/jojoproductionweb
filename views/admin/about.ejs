@@ -18,8 +18,15 @@
                     <h5 class="card-title mb-0">About Page Content</h5>
                 </div>
                 <div class="card-body">
-                    <form action="/admin/about/update" method="POST" id="aboutForm">
+                    <form action="/admin/about/update" method="POST" id="aboutForm" enctype="multipart/form-data">
                         <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="logo" class="form-label">Logo (Optional)</label>
+                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                                <div class="form-text">Upload a logo for the About page.</div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
                             <div class="col-md-12 mb-3">
                                 <label for="content" class="form-label">Main Content <span class="text-danger">*</span></label>
                                 <textarea class="form-control <%= errors && errors.content ? 'is-invalid' : '' %>" 
@@ -36,7 +43,7 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row px-4">
                             <div class="col-md-12 mb-3">
                                 <label for="mission" class="form-label">Our Mission <span class="text-danger">*</span></label>
                                 <textarea class="form-control <%= errors && errors.mission ? 'is-invalid' : '' %>" 
@@ -51,9 +58,6 @@
                                 <% } %>
                                 <div class="form-text">Describe your company's mission and values.</div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label for="story" class="form-label">Our Story <span class="text-danger">*</span></label>
                                 <textarea class="form-control <%= errors && errors.story ? 'is-invalid' : '' %>" 
@@ -70,8 +74,8 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-12">
+                        <div class="row mt-4 mb-3">
+                            <div class="col-md-6 mx-auto">
                                 <button type="submit" class="btn btn-primary me-2">
                                     <i class="fas fa-save me-2"></i>Update About Page
                                 </button>

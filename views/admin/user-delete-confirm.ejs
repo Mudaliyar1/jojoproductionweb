@@ -1,0 +1,18 @@
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <h1 class="h3 mb-4 text-gray-800">Delete User</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <p>Are you sure you want to delete the user: <strong><%= user.name %> (<%= user.email %>)</strong>?</p>
+            <p class="text-danger">This action cannot be undone.</p>
+
+            <form action="/admin/users/<%= user._id %>?_method=DELETE" method="POST">
+                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+
+</div>

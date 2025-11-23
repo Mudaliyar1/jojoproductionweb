@@ -1,4 +1,3 @@
-<%- include('layout', { body: `
 <div class="container-fluid px-4">
     <div class="row mb-4">
         <div class="col-12">
@@ -26,27 +25,27 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <strong>Event Type:</strong>
-                            <p class="text-muted">${inquiry.eventType}</p>
+                            <p class="text-muted">${inquiry.eventType || 'N/A'}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Event Date:</strong>
-                            <p class="text-muted">${new Date(inquiry.eventDate).toLocaleDateString()}</p>
+                            <p class="text-muted">${inquiry.eventDate ? new Date(inquiry.eventDate).toLocaleDateString() : 'N/A'}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Event Location:</strong>
-                            <p class="text-muted">${inquiry.eventLocation}</p>
+                            <p class="text-muted">${inquiry.eventLocation || 'N/A'}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Number of Guests:</strong>
-                            <p class="text-muted">${inquiry.numberOfGuests}</p>
+                            <p class="text-muted">${inquiry.numberOfGuests || 'N/A'}</p>
                         </div>
                         <div class="col-12 mb-3">
                             <strong>Budget Range:</strong>
-                            <p class="text-muted">${inquiry.budgetRange}</p>
+                            <p class="text-muted">${inquiry.budgetRange || 'N/A'}</p>
                         </div>
                         <div class="col-12 mb-3">
                             <strong>How they heard about us:</strong>
-                            <p class="text-muted">${inquiry.heardAbout}</p>
+                            <p class="text-muted">${inquiry.heardAbout || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
@@ -60,19 +59,19 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <strong>Full Name:</strong>
-                            <p class="text-muted">${inquiry.fullName}</p>
+                            <p class="text-muted">${(inquiry.firstName || inquiry.lastName) ? `${inquiry.firstName || ''} ${inquiry.lastName || ''}`.trim() : 'N/A'}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Email Address:</strong>
-                            <p class="text-muted">${inquiry.email}</p>
+                            <p class="text-muted">${inquiry.email || 'N/A'}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Phone Number:</strong>
-                            <p class="text-muted">${inquiry.phoneNumber}</p>
+                            <p class="text-muted">${inquiry.phone || 'N/A'}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Preferred Contact Method:</strong>
-                            <p class="text-muted">${inquiry.preferredContact}</p>
+                            <p class="text-muted">${inquiry.preferredContact || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
@@ -83,7 +82,7 @@
                     <h5 class="mb-0">Event Vision</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">${inquiry.eventVision}</p>
+                    <p class="text-muted">${inquiry.eventVision || 'N/A'}</p>
                 </div>
             </div>
         </div>
@@ -96,7 +95,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <strong>Current Status:</strong>
-                        <span class="badge bg-${inquiry.status === 'new' ? 'primary' : inquiry.status === 'viewed' ? 'info' : inquiry.status === 'responded' ? 'success' : 'secondary'}">
+                        <span class="badge bg-${inquiry.status === 'new' ? 'primary' : inquiry.status === 'viewed' ? 'info' : inquiry.status === 'responded' ? 'success' : inquiry.status === 'accepted' ? 'success' : inquiry.status === 'rejected' ? 'danger' : 'secondary'}">
                             ${inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1)}
                         </span>
                     </div>
@@ -106,7 +105,13 @@
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <button class="btn btn-success" onclick="updateStatus('${inquiry._id}', 'responded')">
+                        <button class="btn btn-success" onclick="updateStatus('${inquiry._id}', 'accepted')">
+                            <i class="fas fa-check-circle"></i> Mark as Accepted
+                        </button>
+                        <button class="btn btn-danger" onclick="updateStatus('${inquiry._id}', 'rejected')">
+                            <i class="fas fa-times-circle"></i> Mark as Rejected
+                        </button>
+                        <button class="btn btn-primary" onclick="updateStatus('${inquiry._id}', 'responded')">
                             <i class="fas fa-reply"></i> Mark as Responded
                         </button>
                         <button class="btn btn-warning" onclick="updateStatus('${inquiry._id}', 'pending')">
@@ -182,4 +187,3 @@ function deleteInquiry(id) {
     }
 }
 </script>
-` }) %>

@@ -24,6 +24,7 @@ router.post('/login', [
 
     try {
         const { email, password } = req.body;
+
         const user = await User.findOne({ email });
 
         if (!user) {
@@ -32,6 +33,7 @@ router.post('/login', [
         }
 
         const isMatch = await user.comparePassword(password);
+
         if (!isMatch) {
             req.flash('error_msg', 'Invalid email or password');
             return res.redirect('/auth/login');
@@ -77,7 +79,7 @@ router.post('/register', [
     }
 
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password } = req.body;
         
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -91,7 +93,7 @@ router.post('/register', [
             name,
             email,
             password,
-            role: role || 'user'
+            role: 'user' // Explicitly set role to 'user' for web registrations
         });
 
         await user.save();

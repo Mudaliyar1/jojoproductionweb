@@ -20,43 +20,50 @@
 <!-- About Content -->
 <section class="about-content-section py-5">
     <div class="container">
-        <div class="row align-items-center mb-5">
-            <div class="col-lg-6" data-aos="fade-right">
-                <div class="about-image-large">
-                    <img src="/images/about-main.jpg" alt="About Jojo's Production" class="img-fluid rounded">
-                </div>
-            </div>
-            <div class="col-lg-6" data-aos="fade-left">
-                <h2 class="section-title">Our Story</h2>
-                <p class="section-text">
-                    <% if (about && about.story) { %>
-                        <%= about.story %>
+        <div class="row mb-5">
+            <div class="col-12 text-center" data-aos="fade-up">
+                <% if (about && about.logo) { %>
+                    <img src="<%= about.logo %>" alt="About Us Logo" class="img-fluid mb-4" style="max-height: 150px;">
+                <% } %>
+                <h2 class="section-title">Welcome to Jojo's Production</h2>
+                <p class="section-text lead">
+                    <% if (about && about.content) { %>
+                        <%= about.content %>
                     <% } else { %>
-                        Jojo's Production was born from a passion for storytelling and a love for capturing life's most precious moments. 
-                        What started as a small dream has grown into a full-service production company dedicated to creating cinematic 
-                        experiences that preserve memories for generations to come.
+                        Welcome to Jojo's Production. This is a placeholder for the About section content. Please update it through the admin panel.
                     <% } %>
                 </p>
             </div>
         </div>
-        
-        <div class="row align-items-center">
-            <div class="col-lg-6 order-lg-2" data-aos="fade-left">
-                <div class="about-image-large">
-                    <img src="/images/about-mission.jpg" alt="Our Mission" class="img-fluid rounded">
+
+        <div class="row mb-5">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="about-section-card">
+                    <h2 class="section-title">Our Story</h2>
+                    <p class="section-text">
+                        <% if (about && about.story) { %>
+                            <%= about.story %>
+                        <% } else { %>
+                            Jojo's Production was born from a passion for storytelling and a love for capturing life's most precious moments. 
+                            What started as a small dream has grown into a full-service production company dedicated to creating cinematic 
+                            experiences that preserve memories for generations to come.
+                        <% } %>
+                    </p>
                 </div>
             </div>
-            <div class="col-lg-6 order-lg-1" data-aos="fade-right">
-                <h2 class="section-title">Our Mission</h2>
-                <p class="section-text">
-                    <% if (about && about.mission) { %>
-                        <%= about.mission %>
-                    <% } else { %>
-                        Our mission is to craft beautiful, authentic stories through visual media. We believe every celebration 
-                        deserves to be captured with artistry and care, creating timeless memories that can be cherished forever. 
-                        We approach each project with fresh eyes and creative hearts, ensuring your unique story is told beautifully.
-                    <% } %>
-                </p>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="about-section-card">
+                    <h2 class="section-title">Our Mission</h2>
+                    <p class="section-text">
+                        <% if (about && about.mission) { %>
+                            <%= about.mission %>
+                        <% } else { %>
+                            Our mission is to craft beautiful, authentic stories through visual media. We believe every celebration 
+                            deserves to be captured with artistry and care, creating timeless memories that can be cherished forever. 
+                            We approach each project with fresh eyes and creative hearts, ensuring your unique story is told beautifully.
+                        <% } %>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -146,5 +153,3 @@
         </div>
     </div>
 </section>
-
-<%- include('partials/footer') %>

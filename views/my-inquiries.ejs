@@ -1,0 +1,52 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="card-title mb-0">My Inquiries</h1>
+                </div>
+                <div class="card-body">
+                    <% if (inquiries && inquiries.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event Type</th>
+                                        <th>Event Date</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Submitted On</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% inquiries.forEach(inquiry => { %>
+                                        <tr>
+                                            <td><%= inquiry.eventType %></td>
+                                            <td><%= inquiry.eventDate ? new Date(inquiry.eventDate).toLocaleDateString() : 'N/A' %></td>
+                                            <td><%= inquiry.eventLocation %></td>
+                                            <td>
+                                                <span class="badge bg-<%= inquiry.status === 'pending' ? 'warning' : inquiry.status === 'in_progress' ? 'info' : inquiry.status === 'accepted' ? 'success' : inquiry.status === 'rejected' ? 'danger' : inquiry.status === 'responded' ? 'primary' : 'secondary' %>">
+                                                    <%= inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1) %>
+                                                </span>
+                                            </td>
+                                            <td><%= inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleString() : 'N/A' %></td>
+                                            <td>
+                                                <a href="/inquiry-details/<%= inquiry._id %>" class="btn btn-info btn-sm">View Details</a>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p>You have not submitted any inquiries yet.</p>
+                        <a href="/inquiry" class="btn btn-primary">Submit an Inquiry</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -36,6 +36,10 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--secondary-color);
 }
 
+main {
+    padding-bottom: 60px; /* Add space above the footer */
+}
+
 /* Navigation */
 .navbar {
     background: rgba(255, 255, 255, 0.95) !important;
@@ -207,6 +211,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* About Section */
+.about-section-card {
+    background-color: var(--bg-light); /* Or any other light background color */
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    height: 100%; /* Ensure cards in the same row have equal height */
+}
+
+.about-section-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
 .about-section {
     padding: 100px 0;
     background: var(--bg-white);
@@ -641,4 +659,35 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-dark);
 }
+}
+
+.carousel {
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.carousel-img {
+    max-height: 400px; /* Adjust as needed for desired smaller size */
+    width: auto; /* Maintain aspect ratio */
+    margin: 0 auto; /* Center the image */
+    object-fit: contain; /* Ensure the entire image is visible */
+}
+
+.carousel-item {
+    text-align: center; /* Center the image within the carousel item */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    padding: 15px;
+    background-size: 50%; /* Adjust icon size within the background */
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%; /* Make the clickable area smaller */
 }

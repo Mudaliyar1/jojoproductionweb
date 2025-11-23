@@ -1,0 +1,23 @@
+<div class="container-fluid">
+    <h1 class="mt-4">Delete Inquiry</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/admin/inquiries">Inquiries</a></li>
+        <li class="breadcrumb-item active">Delete Inquiry</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Confirm Deletion
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to delete the inquiry from <strong><%= inquiry.firstName %> <%= inquiry.lastName %></strong> (Email: <%= inquiry.email %>)?</p>
+            <p>This action cannot be undone.</p>
+
+            <form action="/admin/inquiries/delete/<%= inquiry._id %>" method="POST">
+                <button type="submit" class="btn btn-danger">Delete Inquiry</button>
+                <a href="/admin/inquiries" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

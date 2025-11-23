@@ -1,0 +1,56 @@
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4"><%= service.title %></h1>
+            <% if (service.images && service.images.length > 0) { %>
+                <div id="serviceImageCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <% service.images.forEach((image, index) => { %>
+                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                <img src="<%= image %>" class="carousel-img" alt="<%= service.title %> Image <%= index + 1 %>">
+                            </div>
+                        <% }); %>
+                    </div>
+                    <% if (service.images.length > 1) { %>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#serviceImageCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#serviceImageCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    <% } %>
+                </div>
+            <% } %>
+
+            <% if (service.videos && service.videos.length > 0) { %>
+                <h3 class="mt-5 mb-3">Videos</h3>
+                <div id="serviceVideoCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <% service.videos.forEach((video, index) => {
+                            const videoSrc = video.includes('youtube.com/watch?v=') ? video.replace('watch?v=', 'embed/') : video;
+                        %>
+                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                <video src="<%= videoSrc %>" controls class="carousel-img" alt="<%= service.title %> Video <%= index + 1 %>"></video>
+                            </div>
+                        <% }); %>
+                    </div>
+                    <% if (service.videos.length > 1) { %>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#serviceVideoCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#serviceVideoCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    <% } %>
+                </div>
+            <% } %>
+
+            <p><%= service.description %></p>
+            <a href="/services" class="btn btn-primary">Back to Services</a>
+        </div>
+    </div>
+</div>

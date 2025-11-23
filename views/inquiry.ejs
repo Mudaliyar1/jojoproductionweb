@@ -94,13 +94,24 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="eventLocation" class="form-label">Where is your event taking place? *</label>
+                            <label for="eventLocation" class="form-label">Location *</label>
                             <textarea class="form-control" id="eventLocation" name="eventLocation" rows="2" required></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="message" class="form-label">Tell us more about you, and your vision! *</label>
-                            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            <label for="preferences" class="form-label">Your Preferences/Requirements (Optional)</label>
+                            <textarea class="form-control" id="preferences" name="preferences" rows="4"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="numberOfGuests" class="form-label">Number of Guests</label>
+                                <input type="number" class="form-control" id="numberOfGuests" name="numberOfGuests" min="1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="budgetRange" class="form-label">Budget Range</label>
+                                <input type="text" class="form-control" id="budgetRange" name="budgetRange" placeholder="e.g., $5,000 - $10,000">
+                            </div>
                         </div>
 
                         <div class="mb-3">

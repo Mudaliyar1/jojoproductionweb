@@ -285,33 +285,31 @@ function initializeCharts() {
 }
 
 function initializeWebSocket() {
-    // WebSocket connection for real-time updates
-    const wsUrl = `ws://${window.location.host}/ws`;
-    
-    try {
-        const ws = new WebSocket(wsUrl);
-        
-        ws.onopen = function() {
-            console.log('WebSocket connected');
-        };
-        
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            handleWebSocketMessage(data);
-        };
-        
-        ws.onclose = function() {
-            console.log('WebSocket disconnected');
-            // Attempt to reconnect after 5 seconds
-            setTimeout(initializeWebSocket, 5000);
-        };
-        
-        ws.onerror = function(error) {
-            console.error('WebSocket error:', error);
-        };
-    } catch (error) {
-        console.error('WebSocket connection failed:', error);
-    }
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
+
+    ws.onopen = () => {
+        console.log('WebSocket connection established');
+    };
+
+    ws.onmessage = event => {
+        const data = JSON.parse(event.data);
+        console.log('WebSocket message received:', data);
+        // Handle incoming messages, e.g., display notifications
+        if (data.type === 'notification') {
+            showNotification(data.message);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        // Attempt to reconnect after a delay
+        setTimeout(initializeWebSocket, 3000);
+    };
+
+    ws.onerror = error => {
+        console.error('WebSocket error occurred:', error);
+    };
 }
 
 function handleWebSocketMessage(data) {

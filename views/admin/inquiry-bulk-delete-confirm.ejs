@@ -1,0 +1,31 @@
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Confirm Bulk Deletion</h1>
+    <p class="mb-4">Are you sure you want to delete the following inquiries? This action cannot be undone.</p>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Inquiries to Delete</h6>
+        </div>
+        <div class="card-body">
+            <% if (inquiries && inquiries.length > 0) { %>
+                <ul class="list-group mb-3">
+                    <% inquiries.forEach(inquiry => { %>
+                        <li class="list-group-item">
+                            <strong><%= inquiry.firstName %> <%= inquiry.lastName %></strong> - <%= inquiry.email %>
+                        </li>
+                    <% }) %>
+                </ul>
+                <form action="/admin/inquiries/bulk-delete" method="POST">
+                    <% inquiries.forEach(inquiry => { %>
+                        <input type="hidden" name="inquiryIds[]" value="<%= inquiry._id %>">
+                    <% }) %>
+                    <button type="submit" class="btn btn-danger me-2">Delete Selected Inquiries</button>
+                    <a href="/admin/inquiries" class="btn btn-secondary">Cancel</a>
+                </form>
+            <% } else { %>
+                <p>No inquiries selected for deletion.</p>
+                <a href="/admin/inquiries" class="btn btn-primary">Back to Inquiries</a>
+            <% } %>
+        </div>
+    </div>
+</div>

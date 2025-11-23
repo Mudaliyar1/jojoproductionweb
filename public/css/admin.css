@@ -288,3 +288,12 @@ a:hover {
     background-color: #d4af37;
     border-color: #d4af37;
 }
+
+@media (max-width: 768px) {
+  .form-select-sm[class*="bg-"] {
+    max-height: 150px;
+    overflow-y: auto;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}

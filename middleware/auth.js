@@ -1,9 +1,17 @@
 const User = require('../models/User');
 
 // Check if user is authenticated
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
     if (req.session.user) {
-        return next();
+        try {
+            const user = await User.findById(req.session.user.id);
+            if (user) {
+                req.user = user;
+                return next();
+            }
+        } catch (error) {
+            console.error('Error fetching user in isAuthenticated:', error);
+        }
     }
     req.flash('error_msg', 'Please log in to access this page');
     res.redirect('/auth/login');

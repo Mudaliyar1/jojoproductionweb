@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="card-title mb-0">User Profile</h1>
+                </div>
+                <div class="card-body">
+                    <% if (user) { %>
+                        <div class="mb-3">
+                            <strong>First Name:</strong> <%= user.firstName %>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Last Name:</strong> <%= user.lastName %>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Email:</strong> <%= user.email %>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Role:</strong> <%= user.role %>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Member Since:</strong> <%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A' %>
+                        </div>
+                        <a href="/users/edit/<%= user._id %>" class="btn btn-secondary">Edit Profile</a>
+                    <% } else { %>
+                        <p>User not found.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

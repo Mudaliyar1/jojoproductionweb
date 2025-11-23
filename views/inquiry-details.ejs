@@ -1,0 +1,33 @@
+<%- contentFor('body') %>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="card-title mb-0">Inquiry Details</h1>
+                </div>
+                <div class="card-body">
+                    <p><strong>First Name:</strong> <%= inquiry.firstName %></p>
+                    <p><strong>Last Name:</strong> <%= inquiry.lastName %></p>
+                    <p><strong>Email:</strong> <%= inquiry.email %></p>
+                    <p><strong>Phone:</strong> <%= inquiry.phone %></p>
+                    <p><strong>Status:</strong> <span class="badge bg-<%= inquiry.status === 'pending' ? 'warning' : inquiry.status === 'in_progress' ? 'info' : inquiry.status === 'accepted' ? 'success' : inquiry.status === 'rejected' ? 'danger' : inquiry.status === 'responded' ? 'primary' : inquiry.status === 'viewed' ? 'secondary' : 'secondary' %>">
+                        <%= inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1) %>
+                    </span></p>
+                    <p><strong>Event Type:</strong> <%= inquiry.eventType %></p>
+                    <p><strong>Event Date:</strong> <%= inquiry.eventDate ? new Date(inquiry.eventDate).toLocaleDateString() : 'N/A' %></p>
+                    <p><strong>Event Location:</strong> <%= inquiry.eventLocation %></p>
+                    <p><strong>Number of Guests:</strong> <%= inquiry.numberOfGuests || 'N/A' %></p>
+                    <p><strong>Budget Range:</strong> <%= inquiry.budgetRange || 'N/A' %></p>
+                    <p><strong>Heard About Us:</strong> <%= inquiry.heardAbout %></p>
+                    <p><strong>Preferences:</strong> <%= inquiry.preferences || 'N/A' %></p>
+                    <p><strong>Submitted On:</strong> <%= inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleString() : 'N/A' %></p>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="/my-inquiries" class="btn btn-secondary">Back to My Inquiries</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

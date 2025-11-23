@@ -13,6 +13,10 @@ const aboutSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    logo: {
+        type: String,
+        default: ''
+    },
     updatedAt: {
         type: Date,
         default: Date.now

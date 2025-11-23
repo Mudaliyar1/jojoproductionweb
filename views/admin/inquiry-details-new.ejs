@@ -1,0 +1,85 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Inquiry Details for #<%= inquiry._id %></h2>
+        <a href="/admin/inquiries" class="btn btn-secondary">Back to Inquiries</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Event Information</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Event Type:</strong> <%= inquiry.eventType || 'N/A' %></p>
+            <p><strong>Event Date:</strong> <%= inquiry.eventDate ? new Date(inquiry.eventDate).toLocaleDateString() : 'N/A' %></p>
+            <p><strong>Location:</strong> <%= inquiry.eventLocation || 'N/A' %></p>
+            <p><strong>Number of Guests:</strong> <%= inquiry.numberOfGuests || 'N/A' %></p>
+            <p><strong>Budget Range:</strong> <%= inquiry.budgetRange || 'N/A' %></p>
+            <p><strong>How they heard about us:</strong> <%= inquiry.heardAbout || 'N/A' %></p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Contact Information</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Full Name:</strong> <%= (inquiry.firstName || inquiry.lastName) ? `${inquiry.firstName || ''} ${inquiry.lastName || ''}`.trim() : 'N/A' %></p>
+            <p><strong>Email Address:</strong> <%= inquiry.email || 'N/A' %></p>
+            <p><strong>Phone Number:</strong> <%= inquiry.phone || 'N/A' %></p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Your Preferences/Requirements</h4>
+        </div>
+        <div class="card-body">
+            <p><%= inquiry.preferences || 'N/A' %></p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Status & Actions</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Status:</strong> <span class="badge bg-<%= inquiry.status === 'pending' ? 'warning' : inquiry.status === 'in_progress' ? 'info' : inquiry.status === 'accepted' ? 'success' : inquiry.status === 'rejected' ? 'danger' : inquiry.status === 'responded' ? 'primary' : 'secondary' %>"><%= inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1) %></span></p>
+            <p><strong>Created At:</strong> <%= inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleString() : 'N/A' %></p>
+            <div class="mt-3">
+                <h5>Update Status:</h5>
+                <select class="form-select form-select-sm bg-<%= inquiry.status === 'pending' ? 'warning' : inquiry.status === 'in_progress' ? 'info' : inquiry.status === 'accepted' ? 'success' : inquiry.status === 'rejected' ? 'danger' : inquiry.status === 'responded' ? 'primary' : inquiry.status === 'viewed' ? 'secondary' : 'secondary' %>" onchange="updateStatus('<%= inquiry._id %>', this.value)">
+                    <option value="pending" <%= inquiry.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="in_progress" <%= inquiry.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+                    <option value="accepted" <%= inquiry.status === 'accepted' ? 'selected' : '' %>>Accepted</option>
+                    <option value="rejected" <%= inquiry.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                    <option value="responded" <%= inquiry.status === 'responded' ? 'selected' : '' %>>Responded</option>
+                    <option value="viewed" <%= inquiry.status === 'viewed' ? 'selected' : '' %>>Viewed</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateStatus(id, status) {
+    fetch('/admin/inquiries/status/' + id, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error updating status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating status');
+    });
+}
+</script>

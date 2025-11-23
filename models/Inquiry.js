@@ -45,9 +45,22 @@ const inquirySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    numberOfGuests: {
+        type: Number,
+        min: 1,
+        required: false
+    },
+    budgetRange: {
+        type: String,
+        required: false
+    },
     message: {
         type: String,
-        required: true
+        required: false
+    },
+    preferences: {
+        type: String,
+        required: false
     },
     heardAbout: {
         type: String,
@@ -67,6 +80,6 @@ const inquirySchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Inquiry', inquirySchema);
