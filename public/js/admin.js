@@ -366,3 +366,337 @@ function performBulkAction(action) {
         showToast('Error performing bulk action', 'error');
     });
 }
+
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+// Initialize popovers
+var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+  return new bootstrap.Popover(popoverTriggerEl)
+})
+
+// Auto-hide alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            const bootstrapAlert = bootstrap.Alert.getInstance(alert);
+            if (bootstrapAlert) {
+                bootstrapAlert.close();
+            } else {
+                alert.remove();
+            }
+        }, 5000);
+    });
+});
+
+// Table search functionality
+const searchInput = document.getElementById('tableSearch');
+if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
+        const value = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#dataTable tbody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(value) ? '' : 'none';
+        });
+    });
+}
+
+// Bulk actions for tables
+const bulkActionCheckbox = document.getElementById('bulkActionCheckbox');
+if (bulkActionCheckbox) {
+    bulkActionCheckbox.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('#dataTable tbody input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkActions();
+    });
+}
+
+document.querySelectorAll('#dataTable tbody input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', updateBulkActions);
+});
+
+function updateBulkActions() {
+    const checkedCheckboxes = document.querySelectorAll('#dataTable tbody input[type="checkbox"]:checked');
+    const bulkActionsContainer = document.getElementById('bulkActionsContainer');
+    if (bulkActionsContainer) {
+        if (checkedCheckboxes.length > 0) {
+            bulkActionsContainer.style.display = 'block';
+        } else {
+            bulkActionsContainer.style.display = 'none';
+        }
+    }
+}
+
+// Image preview and drag-and-drop file upload
+const imageUpload = document.getElementById('imageUpload');
+const imagePreview = document.getElementById('imagePreview');
+
+if (imageUpload && imagePreview) {
+    imageUpload.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and drop functionality
+    imagePreview.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        imagePreview.classList.add('drag-over');
+    });
+
+    imagePreview.addEventListener('dragleave', () => {
+        imagePreview.classList.remove('drag-over');
+    });
+
+    imagePreview.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imagePreview.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            // Set the file to the input element
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            imageUpload.files = dataTransfer.files;
+        }
+    });
+}
+
+// Confirm before delete functionality
+document.querySelectorAll('.confirm-delete').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = this.closest('form');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+
+// Status update buttons
+document.querySelectorAll('.status-update-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = this.closest('form');
+        const currentStatus = this.dataset.currentStatus;
+        const newStatus = this.dataset.newStatus;
+
+        Swal.fire({
+            title: 'Confirm Status Change',
+            text: `Change status from ${currentStatus} to ${newStatus}?`,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, change it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+
+// Chart.js initialization (example, adjust as needed)
+var ctx = document.getElementById('myChart');
+if (ctx) {
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// WebSocket initialization (example, adjust as needed)
+const socket = new WebSocket('ws://localhost:3000');
+
+socket.onopen = function(event) {
+    console.log('WebSocket is open now.');
+};
+
+socket.onmessage = function(event) {
+    console.log('WebSocket message received:', event.data);
+    // Handle incoming message
+};
+
+socket.onclose = function(event) {
+    console.log('WebSocket is closed now.');
+};
+
+socket.onerror = function(error) {
+    console.error('WebSocket error:', error);
+};
+
+// Utility function to get CSRF token
+function getCsrfToken() {
+    return document.querySelector('meta[name="_csrf"]').getAttribute('content');
+}
+
+// Utility function to show toast messages
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        console.warn('Toast container not found.');
+        return;
+    }
+
+    const toast = document.createElement('div');
+    toast.classList.add('toast', `bg-${type}`, 'text-white', 'border-0');
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+    const bootstrapToast = new bootstrap.Toast(toast);
+    bootstrapToast.show();
+}
+
+// Debounce function for performance
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+// Example of using debounce with search input
+// searchInput.addEventListener('keyup', debounce(function() {
+//     // Your search logic here
+//     console.log('Searching for:', this.value);
+// }, 300));
+
+// Function to perform bulk action (example)
+function performBulkAction(actionUrl, method = 'POST') {
+    const checkedCheckboxes = document.querySelectorAll('#dataTable tbody input[type="checkbox"]:checked');
+    const ids = Array.from(checkedCheckboxes).map(cb => cb.value);
+
+    if (ids.length === 0) {
+        showToast('No items selected for bulk action.', 'warning');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Confirm Bulk Action',
+        text: `Are you sure you want to perform this action on ${ids.length} selected items?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, proceed!'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const csrfToken = getCsrfToken();
+                const response = await fetch(actionUrl, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({ ids: ids })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast(data.message || 'Bulk action performed successfully!');
+                    // Optionally reload page or update UI
+                    location.reload();
+                } else {
+                    showToast(data.message || 'Failed to perform bulk action.', 'danger');
+                }
+            } catch (error) {
+                console.error('Error during bulk action:', error);
+                showToast('An error occurred during bulk action.', 'danger');
+            }
+        }
+    });
+}
+
+// Sidebar toggling logic
+// const sidebarToggle = document.querySelector('.navbar-toggler');
+// const sidebarCloseButton = document.querySelector('.sidebar-header .btn-close');
+// const sidebar = document.getElementById('adminSidebar');
+// const mainContent = document.querySelector('.main-content');
+
+// if (sidebarToggle && sidebar && mainContent) {
+//     sidebarToggle.addEventListener('click', function() {
+//         sidebar.classList.toggle('show');
+//         mainContent.classList.toggle('sidebar-expanded');
+//     });
+// }
+
+// if (sidebarCloseButton && sidebar && mainContent) {
+//     sidebarCloseButton.addEventListener('click', function() {
+//         sidebar.classList.remove('show');
+//         mainContent.classList.remove('sidebar-expanded');
+//     });
+// }
