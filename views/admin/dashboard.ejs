@@ -1,0 +1,178 @@
+<!-- Dashboard Stats Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Users
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.totalUsers %></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Inquiries
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.totalInquiries %></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Total Services
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.totalServices %></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-concierge-bell fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Team Members
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.totalTeamMembers %></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-friends fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Inquiries -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Inquiries</h6>
+            </div>
+            <div class="card-body">
+                <% if (recentInquiries && recentInquiries.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Event Type</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentInquiries.forEach(inquiry => { %>
+                                    <tr>
+                                        <td><%= inquiry.firstName %> <%= inquiry.lastName %></td>
+                                        <td><%= inquiry.email %></td>
+                                        <td><%= inquiry.eventType %></td>
+                                        <td><%= inquiry.eventDate.toLocaleDateString() %></td>
+                                        <td>
+                                            <span class="badge <%= inquiry.status === 'new' ? 'bg-warning' : inquiry.status === 'contacted' ? 'bg-info' : 'bg-success' %>">
+                                                <%= inquiry.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="/admin/inquiries/<%= inquiry._id %>" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-4">
+                        <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent inquiries found.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="/admin/inquiries" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        View All Inquiries
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="/admin/services/add" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Add New Service
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="/admin/team/add" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Add Team Member
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="/admin/about" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Edit About Page
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">System Status</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Database Connection</span>
+                    <span class="badge bg-success">Online</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Server Status</span>
+                    <span class="badge bg-success">Running</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Last Updated</span>
+                    <span class="text-muted"><%= new Date().toLocaleTimeString() %></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

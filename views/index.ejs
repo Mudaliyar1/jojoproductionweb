@@ -1,0 +1,144 @@
+<%- include('partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="container text-center">
+            <h1 class="hero-title">
+                Jojo's Production
+            </h1>
+            <p class="hero-subtitle">
+                Crafting Moments into Memories
+            </p>
+            <a href="/inquiry" class="btn btn-primary btn-lg hero-btn">
+                Start Your Journey
+            </a>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <a href="#about-preview" class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </div>
+</section>
+
+<!-- About Preview Section -->
+<section id="about-preview" class="about-preview-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="section-title">About Our Studio</h2>
+                <p class="section-text">
+                    <% if (about && about.content) { %>
+                        <%= about.content.substring(0, 300) %>...
+                    <% } else { %>
+                        Welcome to Jojo's Production, where we transform your special moments into timeless memories. 
+                        Our team of passionate creatives specializes in capturing the essence of your celebrations 
+                        with cinematic excellence and artistic vision.
+                    <% } %>
+                </p>
+                <a href="/about" class="btn btn-outline-primary">Read More</a>
+            </div>
+            <div class="col-lg-6">
+                <div class="about-image-container">
+                    <img src="/images/about-preview.jpg" alt="About Jojo's Production" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="services-preview-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Our Services</h2>
+            <p class="section-subtitle">Creating magical experiences for every occasion</p>
+        </div>
+        <div class="row">
+            <% if (featuredServices && featuredServices.length > 0) { %>
+                <% featuredServices.forEach((service, index) => { %>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="service-card">
+                            <div class="service-image">
+                                <img src="<%= service.image %>" alt="<%= service.title %>" class="img-fluid">
+                                <div class="service-overlay">
+                                    <h5><%= service.title %></h5>
+                                </div>
+                            </div>
+                            <div class="service-content">
+                                <h5><%= service.title %></h5>
+                                <p><%= service.description.substring(0, 100) %>...</p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="col-12 text-center">
+                    <p class="text-muted">Services coming soon...</p>
+                </div>
+            <% } %>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/services" class="btn btn-primary">View All Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">What Our Clients Say</h2>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Jojo's Production made our wedding day absolutely magical. The attention to detail and cinematic quality exceeded all our expectations."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <h6>Sarah & Michael</h6>
+                        <span>Wedding Ceremony</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Professional, creative, and incredibly talented. They captured our corporate event perfectly and delivered stunning results."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <h6>Jennifer Adams</h6>
+                        <span>Corporate Event</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"The team was amazing throughout our entire wedding celebration. They truly understand how to capture emotions and create lasting memories."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <h6>Emma & David</h6>
+                        <span>Wedding Reception</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Banner -->
+<section class="contact-banner py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div>
+            <h2 class="mb-3">Ready to Create Something Beautiful?</h2>
+            <p class="mb-4">Let's discuss your vision and bring your special moments to life</p>
+            <a href="/inquiry" class="btn btn-light btn-lg">Get In Touch</a>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

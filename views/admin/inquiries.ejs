@@ -1,0 +1,295 @@
+<!-- Inquiries Filters -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Filter Inquiries</h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="/admin/inquiries" class="row g-3">
+            <div class="col-md-3">
+                <label for="eventType" class="form-label">Event Type</label>
+                <select class="form-select" id="eventType" name="eventType">
+                    <option value="">All Types</option>
+                    <option value="Wedding Pre-Event(s)">Wedding Pre-Event(s)</option>
+                    <option value="Wedding Ceremony">Wedding Ceremony</option>
+                    <option value="Wedding Reception">Wedding Reception</option>
+                    <option value="Engagement">Engagement</option>
+                    <option value="Bridal Shower">Bridal Shower</option>
+                    <option value="Baby Shower">Baby Shower</option>
+                    <option value="Birthday">Birthday</option>
+                    <option value="Corporate Event">Corporate Event</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="source" class="form-label">How They Heard</label>
+                <select class="form-select" id="source" name="source">
+                    <option value="">All Sources</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Google Search">Google Search</option>
+                    <option value="Friends/Family">Friends/Family</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="confirmed">Confirmed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="dateFrom" class="form-label">Date From</label>
+                <input type="date" class="form-control" id="dateFrom" name="dateFrom">
+            </div>
+            <div class="col-md-3">
+                <label for="dateTo" class="form-label">Date To</label>
+                <input type="date" class="form-control" id="dateTo" name="dateTo">
+            </div>
+            <div class="col-md-6">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" placeholder="Search by name, email, or location...">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-filter me-1"></i>Filter
+                </button>
+                <a href="/admin/inquiries" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Inquiries Table -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Inquiry Management</h6>
+        <div class="d-flex">
+            <button class="btn btn-outline-primary btn-sm me-2" onclick="exportInquiries()">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+            <a href="/admin/inquiries" class="btn btn-primary btn-sm">
+                <i class="fas fa-sync-alt me-1"></i>Refresh
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <% if (inquiries && inquiries.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table table-hover" id="inquiriesTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Event Type</th>
+                            <th>Event Date</th>
+                            <th>Location</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% inquiries.forEach(inquiry => { %>
+                            <tr>
+                                <td>
+                                    <div class="fw-bold"><%= inquiry.firstName %> <%= inquiry.lastName %></div>
+                                    <% if (inquiry.newsletter) { %>
+                                        <small class="badge bg-success">Newsletter</small>
+                                    <% } %>
+                                </td>
+                                <td><%= inquiry.email %></td>
+                                <td><%= inquiry.phone %></td>
+                                <td><%= inquiry.eventType %></td>
+                                <td><%= inquiry.eventDate.toLocaleDateString() %></td>
+                                <td>
+                                    <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= inquiry.eventLocation %>">
+                                        <%= inquiry.eventLocation %>
+                                    </div>
+                                </td>
+                                <td><%= inquiry.howTheyHeard %></td>
+                                <td>
+                                    <span class="badge <%= inquiry.status === 'new' ? 'bg-warning text-dark' : inquiry.status === 'contacted' ? 'bg-info' : 'bg-success' %>">
+                                        <%= inquiry.status %>
+                                    </span>
+                                </td>
+                                <td><%= inquiry.createdAt.toLocaleDateString() %></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewInquiry('<%= inquiry._id %>')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="updateStatus('<%= inquiry._id %>', 'contacted')" title="Mark as Contacted">
+                                            <i class="fas fa-phone"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteInquiry('<%= inquiry._id %>', '<%= inquiry.firstName %> <%= inquiry.lastName %>')" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center py-4">
+                <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No inquiries found matching your criteria.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% const _totalPages = (typeof totalPages !== 'undefined' && Number.isInteger(totalPages)) ? totalPages : 1;
+   const _currentPage = (typeof currentPage !== 'undefined' && Number.isInteger(currentPage)) ? currentPage : 1;
+   const _qs = (typeof queryString !== 'undefined') ? queryString : '';
+   if (_totalPages > 1) { %>
+    <nav aria-label="Inquiries pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <%= _currentPage === 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="?page=<%= _currentPage - 1 %>&<%= _qs %>">Previous</a>
+            </li>
+            
+            <% for (let i = 1; i <= _totalPages; i++) { %>
+                <li class="page-item <%= _currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&<%= _qs %>"><%= i %></a>
+                </li>
+            <% } %>
+            
+            <li class="page-item <%= _currentPage === _totalPages ? 'disabled' : '' %>">
+                <a class="page-link" href="?page=<%= _currentPage + 1 %>&<%= _qs %>">Next</a>
+            </li>
+        </ul>
+    </nav>
+<% } %>
+
+<!-- Inquiry Details Modal -->
+<div class="modal fade" id="inquiryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Inquiry Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="inquiryModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="markAsContacted()">Mark as Contacted</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentInquiryId = null;
+    
+    // View inquiry details
+    function viewInquiry(inquiryId) {
+        currentInquiryId = inquiryId;
+        fetch(`/admin/inquiries/${inquiryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const inquiry = data.inquiry;
+                    const modalBody = document.getElementById('inquiryModalBody');
+                    
+                    modalBody.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Contact Information</h6>
+                                <p><strong>Name:</strong> ${inquiry.firstName} ${inquiry.lastName}</p>
+                                <p><strong>Email:</strong> ${inquiry.email}</p>
+                                <p><strong>Phone:</strong> ${inquiry.phone}</p>
+                                <p><strong>Event Type:</strong> ${inquiry.eventType}</p>
+                                <p><strong>Event Date:</strong> ${new Date(inquiry.eventDate).toLocaleDateString()}</p>
+                                <p><strong>Location:</strong> ${inquiry.eventLocation}</p>
+                                <p><strong>How they heard:</strong> ${inquiry.howTheyHeard}</p>
+                                <p><strong>Status:</strong> <span class="badge ${inquiry.status === 'new' ? 'bg-warning text-dark' : inquiry.status === 'contacted' ? 'bg-info' : 'bg-success'}">${inquiry.status}</span></p>
+                                ${inquiry.newsletter ? '<p><span class="badge bg-success">Subscribed to newsletter</span></p>' : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Event Details</h6>
+                                <p><strong>Message:</strong></p>
+                                <p class="bg-light p-3 rounded">${inquiry.message}</p>
+                                <p><strong>Submitted:</strong> ${new Date(inquiry.createdAt).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    new bootstrap.Modal(document.getElementById('inquiryModal')).show();
+                }
+            })
+            .catch(error => {
+                alert('Error loading inquiry details: ' + error.message);
+            });
+    }
+    
+    // Update inquiry status
+    function updateStatus(inquiryId, status) {
+        fetch(`/admin/inquiries/${inquiryId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error updating status: ' + error.message);
+        });
+    }
+    
+    // Mark as contacted from modal
+    function markAsContacted() {
+        if (currentInquiryId) {
+            updateStatus(currentInquiryId, 'contacted');
+        }
+    }
+    
+    // Delete inquiry
+    function deleteInquiry(inquiryId, inquiryName) {
+        if (confirm(`Are you sure you want to delete inquiry from ${inquiryName}?`)) {
+            fetch(`/admin/inquiries/${inquiryId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error deleting inquiry: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error deleting inquiry: ' + error.message);
+            });
+        }
+    }
+    
+    // Export inquiries
+    function exportInquiries() {
+        const queryString = window.location.search;
+        window.open(`/admin/inquiries/export${queryString}`, '_blank');
+    }
+</script>

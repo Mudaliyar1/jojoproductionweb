@@ -1,0 +1,179 @@
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="page-title">Services Management</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Services</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control table-search" data-table="servicesTable" placeholder="Search services...">
+            </div>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="/admin/services/new" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Service
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">All Services</h5>
+                </div>
+                <div class="card-body">
+                    <% if (services && services.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="servicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Featured</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% services.forEach(service => { %>
+                                        <tr>
+                                            <td>
+                                                <% if (service.image) { %>
+                                                    <img src="<%= service.image %>" alt="<%= service.title %>" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                                <% } else { %>
+                                                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <strong><%= service.title %></strong>
+                                            </td>
+                                            <td>
+                                                <div style="max-width: 300px;">
+                                                    <%= service.description ? service.description.substring(0, 100) + '...' : 'No description' %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge <%= service.featured ? 'bg-success' : 'bg-secondary' %>">
+                                                    <%= service.featured ? 'Yes' : 'No' %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <%= new Date(service.createdAt).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="/admin/services/edit/<%= service._id %>" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit Service">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn" 
+                                                            data-name="<%= service.title %>"
+                                                            data-url="/admin/services/delete/<%= service._id %>"
+                                                            data-bs-toggle="tooltip" title="Delete Service">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    <% if (service.featured) { %>
+                                                        <button type="button" class="btn btn-sm btn-outline-warning status-btn" 
+                                                                data-url="/admin/services/toggle-featured/<%= service._id %>"
+                                                                data-status="false"
+                                                                data-bs-toggle="tooltip" title="Remove from Featured">
+                                                            <i class="fas fa-star"></i>
+                                                        </button>
+                                                    <% } else { %>
+                                                        <button type="button" class="btn btn-sm btn-outline-success status-btn" 
+                                                                data-url="/admin/services/toggle-featured/<%= service._id %>"
+                                                                data-status="true"
+                                                                data-bs-toggle="tooltip" title="Add to Featured">
+                                                            <i class="far fa-star"></i>
+                                                        </button>
+                                                    <% } %>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="fas fa-concierge-bell fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No services found</h5>
+                            <p class="text-muted">Start by adding your first service.</p>
+                            <a href="/admin/services/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add New Service
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.img-thumbnail {
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.img-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+</style>

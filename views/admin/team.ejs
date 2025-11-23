@@ -1,0 +1,184 @@
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="page-title">Team Management</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Team Members</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control table-search" data-table="teamTable" placeholder="Search team members...">
+            </div>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="/admin/team/new" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Team Member
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Team Members</h5>
+                </div>
+                <div class="card-body">
+                    <% if (teamMembers && teamMembers.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="teamTable">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Role</th>
+                                        <th>Description</th>
+                                        <th>Order</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% teamMembers.forEach(member => { %>
+                                        <tr>
+                                            <td>
+                                                <% if (member.image) { %>
+                                                    <img src="<%= member.image %>" alt="<%= member.name %>" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                                <% } else { %>
+                                                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-user text-muted"></i>
+                                                    </div>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <strong><%= member.name %></strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary"><%= member.role %></span>
+                                            </td>
+                                            <td>
+                                                <div style="max-width: 300px;">
+                                                    <%= member.description ? member.description.substring(0, 100) + '...' : 'No description' %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary"><%= member.order || 0 %></span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="/admin/team/edit/<%= member._id %>" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit Member">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn" 
+                                                            data-name="<%= member.name %>"
+                                                            data-url="/admin/team/delete/<%= member._id %>"
+                                                            data-bs-toggle="tooltip" title="Delete Member">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    <% if (member.order > 1) { %>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary status-btn" 
+                                                                data-url="/admin/team/move/<%= member._id %>?direction=up"
+                                                                data-bs-toggle="tooltip" title="Move Up">
+                                                            <i class="fas fa-arrow-up"></i>
+                                                        </button>
+                                                    <% } %>
+                                                    <% if (member.order < teamMembers.length) { %>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary status-btn" 
+                                                                data-url="/admin/team/move/<%= member._id %>?direction=down"
+                                                                data-bs-toggle="tooltip" title="Move Down">
+                                                            <i class="fas fa-arrow-down"></i>
+                                                        </button>
+                                                    <% } %>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No team members found</h5>
+                            <p class="text-muted">Start by adding your first team member.</p>
+                            <a href="/admin/team/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Team Member
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.img-thumbnail {
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.img-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--secondary-color) !important;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+</style>

@@ -1,0 +1,324 @@
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="page-title">About Page Management</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item active">About Page</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">About Page Content</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/about/update" method="POST" id="aboutForm">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="content" class="form-label">Main Content <span class="text-danger">*</span></label>
+                                <textarea class="form-control <%= errors && errors.content ? 'is-invalid' : '' %>" 
+                                          id="content" 
+                                          name="content" 
+                                          rows="6" 
+                                          required><%= about && about.content ? about.content : '' %></textarea>
+                                <% if (errors && errors.content) { %>
+                                    <div class="invalid-feedback">
+                                        <%= errors.content %>
+                                    </div>
+                                <% } %>
+                                <div class="form-text">This will be the main content displayed on the About page.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="mission" class="form-label">Our Mission <span class="text-danger">*</span></label>
+                                <textarea class="form-control <%= errors && errors.mission ? 'is-invalid' : '' %>" 
+                                          id="mission" 
+                                          name="mission" 
+                                          rows="4" 
+                                          required><%= about && about.mission ? about.mission : '' %></textarea>
+                                <% if (errors && errors.mission) { %>
+                                    <div class="invalid-feedback">
+                                        <%= errors.mission %>
+                                    </div>
+                                <% } %>
+                                <div class="form-text">Describe your company's mission and values.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="story" class="form-label">Our Story <span class="text-danger">*</span></label>
+                                <textarea class="form-control <%= errors && errors.story ? 'is-invalid' : '' %>" 
+                                          id="story" 
+                                          name="story" 
+                                          rows="6" 
+                                          required><%= about && about.story ? about.story : '' %></textarea>
+                                <% if (errors && errors.story) { %>
+                                    <div class="invalid-feedback">
+                                        <%= errors.story %>
+                                    </div>
+                                <% } %>
+                                <div class="form-text">Share your company's journey and background.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-save me-2"></i>Update About Page
+                                </button>
+                                <a href="/admin" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Page Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="preview-section mb-4">
+                        <h6 class="preview-section-title">Main Content</h6>
+                        <div id="previewContent" class="preview-content">
+                            <%= about && about.content ? about.content.substring(0, 200) + '...' : 'Main content will appear here...' %>
+                        </div>
+                    </div>
+
+                    <div class="preview-section mb-4">
+                        <h6 class="preview-section-title">Our Mission</h6>
+                        <div id="previewMission" class="preview-content">
+                            <%= about && about.mission ? about.mission.substring(0, 150) + '...' : 'Mission statement will appear here...' %>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h6 class="preview-section-title">Our Story</h6>
+                        <div id="previewStory" class="preview-content">
+                            <%= about && about.story ? about.story.substring(0, 200) + '...' : 'Company story will appear here...' %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Writing Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Be authentic and genuine in your storytelling
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Highlight what makes your company unique
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Keep your mission statement clear and concise
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Use storytelling to connect with your audience
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <% if (about && about.updatedAt) { %>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Last Updated</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0 text-muted">
+                            <i class="fas fa-clock me-2"></i>
+                            <%= new Date(about.updatedAt).toLocaleString() %>
+                        </p>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<style>
+.preview-section {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.preview-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.preview-section-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preview-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    background-color: var(--light-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+textarea.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    display: block;
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .preview-section {
+        margin-bottom: 1rem;
+    }
+    
+    .preview-content {
+        font-size: 0.85rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Live preview functionality
+    const contentInput = document.getElementById('content');
+    const missionInput = document.getElementById('mission');
+    const storyInput = document.getElementById('story');
+    
+    const previewContent = document.getElementById('previewContent');
+    const previewMission = document.getElementById('previewMission');
+    const previewStory = document.getElementById('previewStory');
+
+    function updatePreview() {
+        const content = contentInput.value.trim();
+        const mission = missionInput.value.trim();
+        const story = storyInput.value.trim();
+
+        previewContent.textContent = content ? content.substring(0, 200) + (content.length > 200 ? '...' : '') : 'Main content will appear here...';
+        previewMission.textContent = mission ? mission.substring(0, 150) + (mission.length > 150 ? '...' : '') : 'Mission statement will appear here...';
+        previewStory.textContent = story ? story.substring(0, 200) + (story.length > 200 ? '...' : '') : 'Company story will appear here...';
+    }
+
+    contentInput.addEventListener('input', updatePreview);
+    missionInput.addEventListener('input', updatePreview);
+    storyInput.addEventListener('input', updatePreview);
+
+    // Form validation
+    document.getElementById('aboutForm').addEventListener('submit', function(e) {
+        const content = contentInput.value.trim();
+        const mission = missionInput.value.trim();
+        const story = storyInput.value.trim();
+        
+        let isValid = true;
+
+        if (!content) {
+            contentInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            contentInput.classList.remove('is-invalid');
+        }
+
+        if (!mission) {
+            missionInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            missionInput.classList.remove('is-invalid');
+        }
+
+        if (!story) {
+            storyInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            storyInput.classList.remove('is-invalid');
+        }
+
+        if (content && content.length < 50) {
+            e.preventDefault();
+            alert('Main content should be at least 50 characters long.');
+            contentInput.focus();
+            return false;
+        }
+
+        if (mission && mission.length < 20) {
+            e.preventDefault();
+            alert('Mission statement should be at least 20 characters long.');
+            missionInput.focus();
+            return false;
+        }
+
+        if (story && story.length < 100) {
+            e.preventDefault();
+            alert('Company story should be at least 100 characters long.');
+            storyInput.focus();
+            return false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Auto-save functionality (optional)
+    let autoSaveTimer;
+    function autoSave() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            // You could implement auto-save here
+            console.log('Auto-save triggered');
+        }, 30000); // Auto-save after 30 seconds of inactivity
+    }
+
+    contentInput.addEventListener('input', autoSave);
+    missionInput.addEventListener('input', autoSave);
+    storyInput.addEventListener('input', autoSave);
+});
+</script>

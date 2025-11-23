@@ -1,0 +1,339 @@
+<%- include('layout') %>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="page-title"><%= service ? 'Edit Service' : 'Add New Service' %></h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/services">Services</a></li>
+                    <li class="breadcrumb-item active"><%= service ? 'Edit' : 'Add New' %></li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Service Details</h5>
+                </div>
+                <div class="card-body">
+                    <form action="<%= service ? '/admin/services/edit/' + service._id : '/admin/services/new' %>" 
+                          method="POST" 
+                          enctype="multipart/form-data" 
+                          id="serviceForm">
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="title" class="form-label">Service Title <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control <%= errors && errors.title ? 'is-invalid' : '' %>" 
+                                       id="title" 
+                                       name="title" 
+                                       value="<%= service ? service.title : '' %>"
+                                       required>
+                                <% if (errors && errors.title) { %>
+                                    <div class="invalid-feedback">
+                                        <%= errors.title %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control <%= errors && errors.description ? 'is-invalid' : '' %>" 
+                                          id="description" 
+                                          name="description" 
+                                          rows="4" 
+                                          required><%= service ? service.description : '' %></textarea>
+                                <% if (errors && errors.description) { %>
+                                    <div class="invalid-feedback">
+                                        <%= errors.description %>
+                                    </div>
+                                <% } %>
+                                <div class="form-text">Provide a detailed description of the service.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           id="featured" 
+                                           name="featured" 
+                                           <%= service && service.featured ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="featured">
+                                        Featured Service
+                                    </label>
+                                </div>
+                                <div class="form-text">Featured services appear prominently on the homepage.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="image" class="form-label">Service Image</label>
+                                <div class="image-upload-area mb-3" 
+                                     data-input="image" 
+                                     data-preview="imagePreview"
+                                     style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h6>Click to upload or drag and drop</h6>
+                                    <p class="text-muted mb-0">PNG, JPG, JPEG up to 10MB</p>
+                                </div>
+                                <input type="file" 
+                                       class="form-control d-none" 
+                                       id="image" 
+                                       name="image" 
+                                       accept="image/*"
+                                       data-preview="imagePreview">
+                                
+                                <% if (service && service.image) { %>
+                                    <div class="current-image mb-3">
+                                        <label class="form-label">Current Image</label>
+                                        <div class="position-relative d-inline-block">
+                                            <img src="<%= service.image %>" alt="Current service image" class="img-thumbnail" id="currentImage" style="max-width: 200px;">
+                                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" id="removeImage" style="border-radius: 50%; width: 30px; height: 30px;">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <% } %>
+                                
+                                <img id="imagePreview" class="img-thumbnail mt-3 d-none" style="max-width: 200px;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-save me-2"></i><%= service ? 'Update Service' : 'Create Service' %>
+                                </button>
+                                <a href="/admin/services" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Service Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="service-preview">
+                        <div class="preview-image mb-3">
+                            <img id="previewImage" src="<%= service && service.image ? service.image : '/images/placeholder-service.jpg' %>" 
+                                 alt="Service preview" class="img-fluid rounded">
+                        </div>
+                        <h6 id="previewTitle" class="preview-title"><%= service ? service.title : 'Service Title' %></h6>
+                        <p id="previewDescription" class="preview-description text-muted">
+                            <%= service ? service.description.substring(0, 150) + '...' : 'Service description will appear here...' %>
+                        </p>
+                        <% if (service && service.featured) { %>
+                            <span class="badge bg-warning text-dark">Featured</span>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Use high-quality images for better presentation
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Write clear and compelling descriptions
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Feature your most popular services
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Keep titles concise and descriptive
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.image-upload-area:hover {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color) !important;
+}
+
+.image-upload-area.drag-over {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color) !important;
+    transform: scale(1.02);
+}
+
+.service-preview {
+    text-align: center;
+}
+
+.preview-image img {
+    max-height: 200px;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+}
+
+.preview-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.preview-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.current-image {
+    position: relative;
+}
+
+#removeImage {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.current-image:hover #removeImage {
+    opacity: 1;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .image-upload-area {
+        padding: 1rem;
+    }
+    
+    .service-preview {
+        margin-top: 1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Live preview functionality
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewImage = document.getElementById('previewImage');
+
+    titleInput.addEventListener('input', function() {
+        previewTitle.textContent = this.value || 'Service Title';
+    });
+
+    descriptionInput.addEventListener('input', function() {
+        const text = this.value || 'Service description will appear here...';
+        previewDescription.textContent = text.length > 150 ? text.substring(0, 150) + '...' : text;
+    });
+
+    // Image preview
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const currentImage = document.getElementById('currentImage');
+    const removeImageBtn = document.getElementById('removeImage');
+
+    imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('d-none');
+                previewImage.src = e.target.result;
+                
+                if (currentImage) {
+                    currentImage.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    if (removeImageBtn) {
+        removeImageBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to remove the current image?')) {
+                // Add hidden input to indicate image removal
+                const removeInput = document.createElement('input');
+                removeInput.type = 'hidden';
+                removeInput.name = 'removeImage';
+                removeInput.value = 'true';
+                document.getElementById('serviceForm').appendChild(removeInput);
+                
+                // Hide current image
+                currentImage.parentElement.parentElement.style.display = 'none';
+                previewImage.src = '/images/placeholder-service.jpg';
+            }
+        });
+    }
+
+    // Form validation
+    document.getElementById('serviceForm').addEventListener('submit', function(e) {
+        const title = titleInput.value.trim();
+        const description = descriptionInput.value.trim();
+        
+        if (!title) {
+            e.preventDefault();
+            titleInput.classList.add('is-invalid');
+            titleInput.focus();
+            return false;
+        }
+        
+        if (!description) {
+            e.preventDefault();
+            descriptionInput.classList.add('is-invalid');
+            descriptionInput.focus();
+            return false;
+        }
+        
+        if (description.length < 10) {
+            e.preventDefault();
+            alert('Description must be at least 10 characters long.');
+            descriptionInput.focus();
+            return false;
+        }
+    });
+});
+</script>

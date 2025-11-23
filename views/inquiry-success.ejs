@@ -1,0 +1,114 @@
+<%- include('partials/header') %>
+
+<!-- Success Section -->
+<section class="success-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="success-content" data-aos="fade-up">
+                    <div class="success-icon mb-4">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h1 class="success-title mb-3">Thank You!</h1>
+                    <p class="success-message mb-4">
+                        We've received your inquiry and are excited to learn more about your celebration. 
+                        Our team will review your details and get back to you within 24-48 hours.
+                    </p>
+                    
+                    <div class="inquiry-summary mb-5" data-aos="fade-up" data-aos-delay="200">
+                        <div class="card">
+                            <div class="card-body text-start">
+                                <h5 class="card-title mb-3">Your Inquiry Summary</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Name:</strong> <%= inquiry.firstName %> <%= inquiry.lastName %></p>
+                                        <p><strong>Email:</strong> <%= inquiry.email %></p>
+                                        <p><strong>Phone:</strong> <%= inquiry.phone %></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Event Type:</strong> <%= inquiry.eventType %></p>
+                                        <p><strong>Event Date:</strong> <%= inquiry.eventDate.toLocaleDateString() %></p>
+                                        <p><strong>Location:</strong> <%= inquiry.eventLocation %></p>
+                                    </div>
+                                </div>
+                                <% if (inquiry.newsletter) { %>
+                                    <div class="alert alert-success mt-3">
+                                        <i class="fas fa-envelope me-2"></i>
+                                        You've been added to our newsletter list for updates and news!
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="next-steps mb-5" data-aos="fade-up" data-aos-delay="300">
+                        <h5 class="mb-3">What happens next?</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="step-item">
+                                    <div class="step-number">1</div>
+                                    <h6>Review</h6>
+                                    <p>We'll review your inquiry details</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="step-item">
+                                    <div class="step-number">2</div>
+                                    <h6>Contact</h6>
+                                    <p>We'll reach out to discuss your vision</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="step-item">
+                                    <div class="step-number">3</div>
+                                    <h6>Plan</h6>
+                                    <p>We'll create a custom plan for your event</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons" data-aos="fade-up" data-aos-delay="400">
+                        <a href="/" class="btn btn-primary btn-lg me-3">Back to Home</a>
+                        <a href="/services" class="btn btn-outline-primary btn-lg">View Our Services</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Services Section -->
+<section class="additional-services py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h3>Explore More</h3>
+            <p>Discover how we can make your event unforgettable</p>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 text-center mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="service-highlight">
+                    <i class="fas fa-video"></i>
+                    <h5>Cinematic Quality</h5>
+                    <p>Professional videography with artistic storytelling</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="service-highlight">
+                    <i class="fas fa-camera"></i>
+                    <h5>Photography</h5>
+                    <p>Capturing every precious moment beautifully</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="service-highlight">
+                    <i class="fas fa-magic"></i>
+                    <h5>Creative Editing</h5>
+                    <p>Transforming raw footage into magical memories</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

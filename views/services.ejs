@@ -1,0 +1,124 @@
+<%- include('partials/header') %>
+
+<!-- Page Header -->
+<section class="page-header-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="page-title" data-aos="fade-up">Our Services</h1>
+                <p class="page-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Creating magical experiences for every celebration
+                </p>
+                <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="400">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Services</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section class="services-grid-section py-5">
+    <div class="container">
+        <div class="row">
+            <% if (services && services.length > 0) { %>
+                <% services.forEach((service, index) => { %>
+                    <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="<%= index * 100 %>">
+                        <div class="service-card-full">
+                            <div class="service-image-container">
+                                <img src="<%= service.image %>" alt="<%= service.title %>" class="img-fluid">
+                                <div class="service-overlay">
+                                    <button class="btn btn-light btn-sm" onclick="openServiceModal('<%= service._id %>')">
+                                        Learn More
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="service-content">
+                                <h4><%= service.title %></h4>
+                                <p><%= service.description.substring(0, 150) %>...</p>
+                                <div class="service-tags">
+                                    <% if (service.featured) { %>
+                                        <span class="badge bg-primary">Featured</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="col-12 text-center">
+                    <div class="empty-state" data-aos="fade-up">
+                        <i class="fas fa-camera-empty" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h4>No Services Available</h4>
+                        <p class="text-muted">We're currently updating our services. Please check back soon!</p>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Service Modal -->
+<div class="modal fade" id="serviceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="serviceModalTitle">Service Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="serviceModalContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="/inquiry" class="btn btn-primary">Book This Service</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<section class="services-cta py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div data-aos="fade-up">
+            <h2 class="mb-3">Ready to Make Your Event Unforgettable?</h2>
+            <p class="mb-4">Contact us today to discuss how we can bring your vision to life</p>
+            <a href="/inquiry" class="btn btn-light btn-lg">Request a Quote</a>
+        </div>
+    </div>
+</section>
+
+<div id="services-data" data-services="<%- JSON.stringify(services) %>" style="display: none;"></div>
+
+<script>
+    // Service data for modal
+    const servicesDataElement = document.getElementById('services-data');
+    const servicesData = JSON.parse(servicesDataElement.dataset.services);
+    
+    function openServiceModal(serviceId) {
+        const service = servicesData.find(s => s._id === serviceId);
+        if (service) {
+            document.getElementById('serviceModalTitle').textContent = service.title;
+            document.getElementById('serviceModalContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="${service.image}" alt="${service.title}" class="img-fluid rounded mb-3">
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Service Details</h6>
+                        <p>${service.description}</p>
+                        ${service.featured ? '<span class="badge bg-primary">Featured Service</span>' : ''}
+                    </div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('serviceModal')).show();
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,193 @@
+<%- include('partials/header') %>
+
+<!-- Page Header -->
+<section class="page-header-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="page-title" data-aos="fade-up">Let's Create Something Beautiful</h1>
+                <p class="page-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Tell us about your vision and we'll bring it to life
+                </p>
+                <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="400">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Inquiry</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Inquiry Form Section -->
+<section class="inquiry-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="inquiry-form-container" data-aos="fade-up">
+                    <form id="inquiryForm" action="/inquiry" method="POST">
+                        <!-- Flash Messages -->
+                        <% if (success_msg && success_msg.length > 0) { %>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <%= success_msg %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <% } %>
+                        <% if (error_msg && error_msg.length > 0) { %>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <%= error_msg %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <% } %>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="phone"
+                                    name="phone"
+                                    autocomplete="tel"
+                                    inputmode="tel"
+                                    placeholder="e.g., +1 555 123-4567"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eventType" class="form-label">What are you celebrating? *</label>
+                            <select class="form-select" id="eventType" name="eventType" required>
+                                <option value="">Select an event type</option>
+                                <option value="Wedding Pre-Event(s)">Wedding Pre-Event(s)</option>
+                                <option value="Wedding Ceremony">Wedding Ceremony</option>
+                                <option value="Wedding Reception">Wedding Reception</option>
+                                <option value="Engagement">Engagement</option>
+                                <option value="Bridal Shower">Bridal Shower</option>
+                                <option value="Baby Shower">Baby Shower</option>
+                                <option value="Birthday">Birthday</option>
+                                <option value="Corporate Event">Corporate Event</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eventDate" class="form-label">Date of Celebration *</label>
+                            <input type="date" class="form-control" id="eventDate" name="eventDate" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eventLocation" class="form-label">Where is your event taking place? *</label>
+                            <textarea class="form-control" id="eventLocation" name="eventLocation" rows="2" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Tell us more about you, and your vision! *</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="heardAbout" class="form-label">How did you hear about us? *</label>
+                            <select class="form-select" id="heardAbout" name="heardAbout" required>
+                                <option value="">Select an option</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Google Search">Google Search</option>
+                                <option value="Friends/Family">Friends/Family</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter">
+                                <label class="form-check-label" for="newsletter">
+                                    Sign up for news and updates
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <span class="submit-text">Submit Inquiry</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Info Section -->
+<section class="contact-info-section py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 text-center mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h5>Email Us</h5>
+                    <p>contact@jojosproduction.com</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h5>Call Us</h5>
+                    <p>+1 (555) 123-4567</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h5>Response Time</h5>
+                    <p>Within 24-48 hours</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Form validation and submission handling
+    document.getElementById('inquiryForm').addEventListener('submit', function(e) {
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const submitText = submitBtn.querySelector('.submit-text');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        // Show loading state
+        submitText.textContent = 'Submitting...';
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+    });
+
+    // Set minimum date to today
+    document.getElementById('eventDate').min = new Date().toISOString().split('T')[0];
+</script>
+
+<%- include('partials/footer') %>

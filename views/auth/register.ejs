@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Registration - Jojo's Production</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header text-center mb-4">
+                <h2 class="auth-title">Admin Registration</h2>
+                <p class="auth-subtitle">Create your admin account</p>
+            </div>
+            
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <%= success_msg %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= error_msg %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+            
+            <form action="/auth/register" method="POST" class="auth-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text">Password must be at least 6 characters long.</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Register
+                    </button>
+                </div>
+            </form>
+            
+            <div class="auth-footer text-center mt-4">
+                <p>Already have an account? <a href="/auth/login">Login here</a></p>
+                <p>&copy; 2024 Jojo's Production. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+        
+        // Toggle confirm password visibility
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const toggleIcon = this.querySelector('i');
+            
+            if (confirmPasswordInput.type === 'password') {
+                confirmPasswordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                confirmPasswordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!-- Users Table -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">User Management</h6>
+        <div class="d-flex">
+            <input type="text" id="searchInput" class="form-control form-control-sm me-2" placeholder="Search users..." style="width: 200px;">
+            <a href="/admin/users/add" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i>Add User
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <% if (users && users.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table table-hover" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user => { %>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/40x40/6c757d/ffffff?text=<%= user.name.charAt(0) %>" 
+                                             alt="<%= user.name %>" class="rounded-circle me-3" width="40" height="40">
+                                        <div>
+                                            <div class="fw-bold"><%= user.name %></div>
+                                            <small class="text-muted">ID: <%= user._id %></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><%= user.email %></td>
+                                <td>
+                                    <span class="badge <%= user.role === 'admin' ? 'bg-danger' : 'bg-primary' %>">
+                                        <%= user.role %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Active</span>
+                                </td>
+                                <td><%= user.createdAt.toLocaleDateString() %></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/users/<%= user._id %>/edit" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteUser('<%= user._id %>', '<%= user.name %>')" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center py-4">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No users found.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% const _totalPages = (typeof totalPages !== 'undefined' && Number.isInteger(totalPages)) ? totalPages : 1;
+   const _currentPage = (typeof currentPage !== 'undefined' && Number.isInteger(currentPage)) ? currentPage : 1;
+   const _search = (typeof search !== 'undefined') ? search : '';
+   if (_totalPages > 1) { %>
+    <nav aria-label="Users pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <%= _currentPage === 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="?page=<%= _currentPage - 1 %>&search=<%= _search %>">Previous</a>
+            </li>
+            
+            <% for (let i = 1; i <= _totalPages; i++) { %>
+                <li class="page-item <%= _currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&search=<%= _search %>"><%= i %></a>
+                </li>
+            <% } %>
+            
+            <li class="page-item <%= _currentPage === _totalPages ? 'disabled' : '' %>">
+                <a class="page-link" href="?page=<%= _currentPage + 1 %>&search=<%= _search %>">Next</a>
+            </li>
+        </ul>
+    </nav>
+<% } %>
+
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#usersTable tbody tr');
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    
+    // Delete user confirmation
+    function deleteUser(userId, userName) {
+        if (confirm(`Are you sure you want to delete user: ${userName}?`)) {
+            fetch(`/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error deleting user: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error deleting user: ' + error.message);
+            });
+        }
+    }
+</script>

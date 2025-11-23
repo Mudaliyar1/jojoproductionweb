@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - Jojo's Production</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .error-content h1 {
+            font-size: 8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .error-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .error-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .btn-home {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-home:hover {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <div class="error-content">
+            <h1 data-aos="fade-up">404</h1>
+            <h2 data-aos="fade-up" data-aos-delay="200">Page Not Found</h2>
+            <p data-aos="fade-up" data-aos-delay="400">
+                The page you're looking for doesn't exist or has been moved.
+            </p>
+            <a href="/" class="btn-home" data-aos="fade-up" data-aos-delay="600">
+                <i class="fas fa-home me-2"></i>Go Home
+            </a>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+    </script>
+</body>
+</html>

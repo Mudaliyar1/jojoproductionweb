@@ -1,0 +1,38 @@
+{
+  "name": "jojoproductionweb",
+  "version": "1.0.0",
+  "description": "Jojo's Production - Aesthetic production company website",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "production",
+    "website",
+    "mongodb",
+    "express",
+    "nodejs"
+  ],
+  "author": "Jojo's Production",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "gsap": "^3.13.0",
+    "method-override": "^3.0.0",
+    "moment": "^2.29.4",
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
