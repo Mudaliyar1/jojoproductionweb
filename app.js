@@ -1,3 +1,7 @@
+const dns = require('dns');
+// Set Google and Cloudflare public DNS servers to resolve MongoDB SRV lookup issues
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
@@ -19,25 +23,26 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(async () => {
     console.log('MongoDB connected successfully');
-    // Ensure admin user exists
+    // Ensure admin users exist
     const User = require('./models/User');
-    const adminEmail = 'admin@jojoproduction.com';
-    const adminPassword = 'admin123';
-
-    let adminUser = await User.findOne({ email: adminEmail });
-
-    if (!adminUser) {
-        adminUser = new User({
-            name: 'Admin',
-            email: adminEmail,
-            password: adminPassword,
-            role: 'admin'
-        });
-        await adminUser.save();
-        console.log('Default admin user created.');
-    } else {
-        // Optionally update admin password if it changed, or just log
-        console.log('Admin user already exists.');
+    const adminEmails = ['admin@gmail.com', 'admin@jojoproduction.com'];
+    for (const email of adminEmails) {
+        let adminUser = await User.findOne({ email });
+        if (!adminUser) {
+            adminUser = new User({
+                name: 'Admin',
+                email: email,
+                password: 'admin123',
+                role: 'admin'
+            });
+            await adminUser.save();
+            console.log(`Default admin user created for ${email}`);
+        } else {
+            adminUser.password = 'admin123';
+            adminUser.role = 'admin';
+            await adminUser.save();
+            console.log(`Admin user updated for ${email}`);
+        }
     }
 })
 .catch(err => console.error('MongoDB connection error:', err));
@@ -97,8 +102,10 @@ app.use('/admin', (req, res, next) => {
 const mainRoutes = require('./routes/main');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const invoiceRoutes = require('./routes/invoiceRoutes');
   
   app.use('/', mainRoutes);
+  app.use('/admin/invoice-system', invoiceRoutes);
   app.use('/admin', adminRoutes);
   app.use('/auth', authRoutes);
 

@@ -1,0 +1,41 @@
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 border-0">
+        <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-history me-2 text-primary"></i>System Audit & Activity Logs</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Doc #</th>
+                    <th>User</th>
+                    <th>IP Address</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (logs && logs.length > 0) { %>
+                    <% logs.forEach(log => { %>
+                        <tr>
+                            <td class="fs-8 text-muted"><%= new Date(log.createdAt).toLocaleString('en-IN') %></td>
+                            <td>
+                                <span class="badge bg-<%= log.action === 'CREATE' ? 'success-subtle text-success' : log.action === 'UPDATE' ? 'primary-subtle text-primary' : log.action === 'DELETE' ? 'danger-subtle text-danger' : 'info-subtle text-info' %>">
+                                    <%= log.action %>
+                                </span>
+                            </td>
+                            <td class="fw-semibold text-dark"><%= log.module %></td>
+                            <td><%= log.docNumber || '-' %></td>
+                            <td><%= log.user %></td>
+                            <td class="font-monospace fs-8 text-muted"><%= log.ipAddress || '127.0.0.1' %></td>
+                            <td><small class="text-secondary"><%= log.details %></small></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="7" class="text-center py-5 text-muted">No activity logs recorded yet</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>

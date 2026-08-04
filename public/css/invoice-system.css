@@ -1,0 +1,101 @@
+/* Invoice System Modern Canvas & Editor Styles */
+
+.editor-paper-container {
+    background-color: #f1f5f9;
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.editor-paper-canvas {
+    background: #ffffff;
+    width: 100%;
+    min-height: 1050px;
+    padding: 45px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+    position: relative;
+}
+
+.sticky-editor-toolbar {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--brand-border);
+    border-radius: 14px;
+}
+
+/* Glass summary card */
+.summary-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+/* Watermark Overlay */
+.watermark-text {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 5rem;
+    font-weight: 900;
+    color: rgba(239, 68, 68, 0.08);
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 10px;
+    z-index: 1;
+}
+
+/* Input overrides inside document canvas */
+.editor-paper-canvas .form-control,
+.editor-paper-canvas .form-select {
+    border-color: #cbd5e1;
+}
+
+.editor-paper-canvas .form-control:focus,
+.editor-paper-canvas .form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Line Items Table Enhancements */
+.line-items-table {
+    min-width: 1150px;
+}
+
+.line-items-table th,
+.line-items-table td {
+    vertical-align: middle;
+    padding: 0.6rem 0.5rem;
+}
+
+.line-items-table .form-control-sm,
+.line-items-table .form-select-sm {
+    font-size: 0.825rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 6px;
+}
+
+.line-items-table .item-pricetype {
+    min-width: 82px;
+}
+
+.line-items-table .item-rate,
+.line-items-table .item-maxrate {
+    min-width: 95px;
+}
+
+.line-items-table .item-total-text {
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .editor-paper-container {
+        padding: 12px;
+    }
+    .editor-paper-canvas {
+        padding: 16px;
+    }
+}

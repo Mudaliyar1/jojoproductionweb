@@ -1,3 +1,6 @@
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+
 const mongoose = require('mongoose');
 const User = require('../models/User'); // Corrected path
 const bcrypt = require('bcryptjs');

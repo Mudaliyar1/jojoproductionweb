@@ -1,0 +1,300 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">Invoice Document Templates</h3>
+        <p class="text-muted fs-7 mb-0">Select, preview, and visually customize document layouts, color schemes, and typography styles.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <% if (templates && templates.length > 0) { %>
+        <% templates.forEach(tmpl => { %>
+            <div class="col-xl-4 col-md-6">
+                <div class="card card-hover border-0 shadow-sm h-100 position-relative overflow-hidden <%= tmpl.isDefault ? 'border border-2 border-primary' : '' %>">
+                    <% if (tmpl.isDefault) { %>
+                        <span class="position-absolute top-0 end-0 bg-primary text-white fs-8 px-3 py-1 rounded-bl shadow-sm fw-bold">Active System Default</span>
+                    <% } %>
+                    <div class="card-body text-center p-4">
+                        <div class="p-4 rounded-3 mb-3 text-white shadow-sm" style="--p-color: <%= tmpl.primaryColor %>; --s-color: <%= tmpl.secondaryColor %>; background: linear-gradient(135deg, var(--p-color), var(--s-color));">
+                            <i class="fas fa-file-invoice fa-3x mb-2"></i>
+                            <h4 class="fw-bold mb-0" style="--f-family: '<%= tmpl.fontFamily %>'; font-family: var(--f-family), sans-serif;"><%= tmpl.name %></h4>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1"><%= tmpl.name %> Layout</h6>
+                        <p class="text-muted fs-7 mb-3">Font: <strong class="text-dark"><%= tmpl.fontFamily %></strong> | Theme: <span class="badge text-white" style="--p-color: <%= tmpl.primaryColor %>; background-color: var(--p-color);"><%= tmpl.primaryColor %></span></p>
+                        
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <!-- Live Full Invoice Customizer Modal Trigger -->
+                            <button type="button" class="btn btn-sm btn-primary" data-tmpl='<%- JSON.stringify(tmpl) %>' onclick="openVisualCustomizer(this)">
+                                <i class="fas fa-magic me-1"></i>Visual Builder & Live Edit
+                            </button>
+
+                            <% if (!tmpl.isDefault) { %>
+                                <form method="POST" action="/admin/invoice-system/templates/set-default/<%= tmpl._id %>" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"><i class="fas fa-check me-1"></i>Set Default</button>
+                                </form>
+                            <% } else { %>
+                                <button class="btn btn-sm btn-success disabled"><i class="fas fa-check-circle me-1"></i>Active Default</button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<!-- Full A4 Visual Customizer & Preview Modal -->
+<div class="modal fade" id="visualCustomizerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom bg-dark text-white py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-palette text-primary fa-lg"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="customizerModalTitle">Visual Template Customizer</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-0">
+                <form method="POST" action="/admin/invoice-system/templates/save" id="customizerForm">
+                    <input type="hidden" name="id" id="custTmplId">
+
+                    <div class="row g-0">
+                        <!-- Left Control Options Panel -->
+                        <div class="col-lg-4 p-4 border-end bg-light">
+                            <h6 class="fw-bold text-uppercase text-secondary mb-3 fs-8"><i class="fas fa-sliders-h me-2"></i>Theme & Layout Customization</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-7">Primary Color</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" name="primaryColor" id="custPrimary" class="form-control form-control-color" oninput="updateLivePreview()">
+                                    <input type="text" id="custPrimaryHex" class="form-control form-control-sm font-monospace" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-7">Secondary Accent Color</label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="color" name="secondaryColor" id="custSecondary" class="form-control form-control-color" oninput="updateLivePreview()">
+                                    <input type="text" id="custSecondaryHex" class="form-control form-control-sm font-monospace" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-7">Typography Font Family</label>
+                                <select name="fontFamily" id="custFont" class="form-select form-select-sm" onchange="updateLivePreview()">
+                                    <option value="Poppins">Poppins (Modern SaaS)</option>
+                                    <option value="Inter">Inter (Clean Enterprise)</option>
+                                    <option value="Roboto">Roboto (Standard SaaS)</option>
+                                    <option value="Playfair Display">Playfair Display (Luxury & Weddings)</option>
+                                    <option value="Montserrat">Montserrat (Contemporary)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-7">Header Layout Style</label>
+                                <select name="headerStyle" id="custHeaderStyle" class="form-select form-select-sm" onchange="updateLivePreview()">
+                                    <option value="standard">Standard Left Logo & Right Header</option>
+                                    <option value="centered">Centered Branding & Banner</option>
+                                    <option value="split">Modern Split Bar</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-7">Table Border Style</label>
+                                <select name="borderStyle" id="custBorderStyle" class="form-select form-select-sm" onchange="updateLivePreview()">
+                                    <option value="solid">Solid Crisp Grid</option>
+                                    <option value="subtle">Subtle Minimal Grid</option>
+                                    <option value="dashed">Dashed Border Accent</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fs-7 fw-bold">Custom Header / Footer Notes</label>
+                                <textarea name="customNotes" id="custNotes" class="form-control form-control-sm" rows="3" placeholder="Additional text shown at bottom of printed document" oninput="updateLivePreview()"></textarea>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                    <i class="fas fa-save me-1"></i>Save Template Customizations
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Full Document A4 Live Preview Paper -->
+                        <div class="col-lg-8 p-4 bg-secondary-subtle">
+                            <div id="a4LivePreviewCanvas" class="bg-white p-4 p-md-5 rounded shadow border position-relative" style="min-height: 800px; font-size: 0.875rem;">
+                                <!-- Live Header Section -->
+                                <div id="prevHeaderContainer" class="row pb-4 mb-4 border-bottom align-items-center">
+                                    <div class="col-7">
+                                        <div id="prevLogoBox" class="mb-2">
+                                            <div class="badge bg-primary px-3 py-2 fs-6"><i class="fas fa-film me-1"></i>Jojo's Production Logo</div>
+                                        </div>
+                                        <h3 id="prevCompanyName" class="fw-bold mb-0">Jojo's Production</h3>
+                                        <div class="text-muted small">Premium Event Production & Media Services</div>
+                                        <div class="small mt-1 text-secondary">
+                                            123 Film City Road, Studio Hub, Mumbai<br>
+                                            Phone: +91 9876543210 | Email: contact@jojosproduction.com<br>
+                                            <strong>GSTIN: 27AAAAA0000A1Z5</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-5 text-end">
+                                        <h2 id="prevDocTitle" class="text-uppercase fw-bold mb-1">INVOICE</h2>
+                                        <h5 id="prevDocNum" class="fw-bold mb-2"># INV-2026-001</h5>
+                                        <div class="small text-muted">
+                                            <strong>Date:</strong> <%= new Date().toLocaleDateString('en-IN') %><br>
+                                            <strong>Due Date:</strong> <%= new Date(Date.now() + 7*86400000).toLocaleDateString('en-IN') %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Client & Event Section -->
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded border">
+                                            <h6 class="fw-bold text-uppercase fs-8 text-secondary mb-1">Billed To / Client</h6>
+                                            <h5 class="fw-bold mb-1 text-dark">Sharma Wedding Events</h5>
+                                            <div class="small text-secondary">
+                                                Mobile: +91 98765 12345<br>
+                                                Email: sharma.events@gmail.com
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded border">
+                                            <h6 class="fw-bold text-uppercase fs-8 text-secondary mb-1">Event Details</h6>
+                                            <h5 id="prevEventTitle" class="fw-bold mb-1">Grand Wedding Reception</h5>
+                                            <div class="small text-secondary">
+                                                <strong>Date:</strong> <%= new Date().toLocaleDateString('en-IN') %><br>
+                                                <strong>Venue:</strong> Grand Hyatt, Mumbai
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Services Table -->
+                                <table id="prevTable" class="table table-bordered align-middle mb-4">
+                                    <thead id="prevTableHead">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Description / Service</th>
+                                            <th class="text-center">Qty</th>
+                                            <th class="text-end">Rate (₹)</th>
+                                            <th class="text-end">GST %</th>
+                                            <th class="text-end">Amount (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><strong>LED Screen Wall (P2.5 High Res)</strong><br><small class="text-muted">Outdoor setup 20x10 ft</small></td>
+                                            <td class="text-center">1</td>
+                                            <td class="text-end">45,000</td>
+                                            <td class="text-end">18%</td>
+                                            <td class="text-end fw-bold">45,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><strong>JBL VTX Line Array Sound System</strong><br><small class="text-muted">Concert grade audio setup</small></td>
+                                            <td class="text-center">1</td>
+                                            <td class="text-end">35,000</td>
+                                            <td class="text-end">18%</td>
+                                            <td class="text-end fw-bold">35,000</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Live Totals Breakdown -->
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded border">
+                                            <h6 class="fw-bold fs-8 text-secondary mb-2">Banking & UPI Payment Info</h6>
+                                            <div class="small text-secondary">
+                                                Bank: HDFC Bank | A/C: 50200012345678<br>
+                                                IFSC: HDFC0001234 | UPI: jojoproduction@hdfcbank
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <table class="table table-sm table-borderless text-end">
+                                            <tr><td>Subtotal:</td><td>₹80,000.00</td></tr>
+                                            <tr><td>GST Tax (18%):</td><td>₹14,400.00</td></tr>
+                                            <tr class="border-top border-bottom">
+                                                <td class="fw-bold fs-6">Grand Total:</td>
+                                                <td id="prevGrandTotalVal" class="fw-bold fs-6">₹94,400.00</td>
+                                            </tr>
+                                            <tr><td class="text-success">Advance Paid:</td><td class="text-success fw-bold">₹50,000.00</td></tr>
+                                            <tr><td class="text-danger fw-bold">Balance Due:</td><td class="text-danger fw-bold fs-6">₹44,400.00</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Live Custom Notes & Footer -->
+                                <div id="prevFooterNotes" class="pt-3 border-top small text-secondary">
+                                    <strong>Terms & Conditions:</strong><br>
+                                    1. 50% Advance payment required upon confirmation.<br>
+                                    2. Balance to be cleared on event day.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTmplData = null;
+
+function openVisualCustomizer(btn) {
+    currentTmplData = JSON.parse(btn.dataset.tmpl);
+    document.getElementById('custTmplId').value = currentTmplData._id;
+    document.getElementById('customizerModalTitle').innerText = 'Visual Builder & Customizer - ' + currentTmplData.name;
+    
+    document.getElementById('custPrimary').value = currentTmplData.primaryColor || '#4f46e5';
+    document.getElementById('custSecondary').value = currentTmplData.secondaryColor || '#0284c7';
+    document.getElementById('custFont').value = currentTmplData.fontFamily || 'Poppins';
+    
+    const cfg = currentTmplData.layoutConfig || {};
+    document.getElementById('custHeaderStyle').value = cfg.headerStyle || 'standard';
+    document.getElementById('custBorderStyle').value = cfg.borderStyle || 'solid';
+    document.getElementById('custNotes').value = cfg.customNotes || '';
+
+    updateLivePreview();
+    var modal = new bootstrap.Modal(document.getElementById('visualCustomizerModal'));
+    modal.show();
+}
+
+function updateLivePreview() {
+    const primary = document.getElementById('custPrimary').value;
+    const secondary = document.getElementById('custSecondary').value;
+    const font = document.getElementById('custFont').value;
+    const headerStyle = document.getElementById('custHeaderStyle').value;
+    const borderStyle = document.getElementById('custBorderStyle').value;
+
+    document.getElementById('custPrimaryHex').value = primary;
+    document.getElementById('custSecondaryHex').value = secondary;
+
+    const canvas = document.getElementById('a4LivePreviewCanvas');
+    canvas.style.fontFamily = font + ', sans-serif';
+
+    document.getElementById('prevCompanyName').style.color = primary;
+    document.getElementById('prevDocTitle').style.color = primary;
+    document.getElementById('prevDocNum').style.color = secondary;
+    document.getElementById('prevEventTitle').style.color = primary;
+    document.getElementById('prevGrandTotalVal').style.color = primary;
+
+    const tableHead = document.getElementById('prevTableHead');
+    tableHead.style.backgroundColor = primary;
+    tableHead.style.color = '#ffffff';
+
+    const table = document.getElementById('prevTable');
+    if (borderStyle === 'subtle') {
+        table.className = 'table table-borderless table-striped align-middle mb-4';
+    } else if (borderStyle === 'dashed') {
+        table.className = 'table table-bordered border-dashed align-middle mb-4';
+    } else {
+        table.className = 'table table-bordered align-middle mb-4';
+    }
+}
+</script>

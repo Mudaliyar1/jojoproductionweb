@@ -1,0 +1,80 @@
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card card-hover border-0 shadow-sm bg-success text-white">
+            <div class="card-body p-4">
+                <span class="text-white-50 text-uppercase fs-8 fw-semibold mb-1 d-block">Total Sales Billed</span>
+                <h2 class="mb-0 fw-bold">₹<%= totalSales.toLocaleString('en-IN') %></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-hover border-0 shadow-sm bg-primary text-white">
+            <div class="card-body p-4">
+                <span class="text-white-50 text-uppercase fs-8 fw-semibold mb-1 d-block">Total GST Accumulated</span>
+                <h2 class="mb-0 fw-bold">₹<%= totalGst.toLocaleString('en-IN') %></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-hover border-0 shadow-sm bg-warning text-dark">
+            <div class="card-body p-4">
+                <span class="text-dark-50 text-uppercase fs-8 fw-semibold mb-1 d-block">Pending Balance Due</span>
+                <h2 class="mb-0 fw-bold">₹<%= pendingTotal.toLocaleString('en-IN') %></h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-0">
+        <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-chart-line me-2 text-primary"></i>Monthly Financial Revenue Performance</h5>
+    </div>
+    <div class="card-body p-4">
+        <canvas id="revenueChart" height="100"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const labels = JSON.parse('<%- monthLabels %>');
+    const data = JSON.parse('<%- monthlyData %>');
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Monthly Collections (₹)',
+                data: data,
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: '#4f46e5'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

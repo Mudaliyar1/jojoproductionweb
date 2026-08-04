@@ -1,0 +1,106 @@
+<!-- Filter Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="/admin/invoice-system/estimates" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="position-relative">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" name="search" class="form-control ps-5" placeholder="Search by estimate #, client name, mobile..." value="<%= search %>">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="Draft" <%= statusFilter === 'Draft' ? 'selected' : '' %>>Draft</option>
+                    <option value="Sent" <%= statusFilter === 'Sent' ? 'selected' : '' %>>Sent</option>
+                    <option value="Approved" <%= statusFilter === 'Approved' ? 'selected' : '' %>>Approved</option>
+                    <option value="Rejected" <%= statusFilter === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                    <option value="Converted" <%= statusFilter === 'Converted' ? 'selected' : '' %>>Converted</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i>Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Directory Card -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-calculator me-2 text-primary"></i>Estimates Directory</h5>
+        <a href="/admin/invoice-system/estimates/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>New Estimate</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Estimate #</th>
+                    <th>Date</th>
+                    <th>Client Name</th>
+                    <th>Event / Venue</th>
+                    <th>Amount Range / Total</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (estimates && estimates.length > 0) { %>
+                    <% estimates.forEach(est => { %>
+                        <tr>
+                            <td>
+                                <a href="/admin/invoice-system/estimates/edit/<%= est._id %>" class="fw-bold text-primary text-decoration-none">
+                                    <%= est.estimateNumber %>
+                                </a>
+                                <span class="badge bg-light text-muted border ms-1">v<%= est.version %></span>
+                            </td>
+                            <td><%= new Date(est.estimateDate).toLocaleDateString('en-IN') %></td>
+                            <td>
+                                <div class="fw-semibold text-dark"><%= est.client ? est.client.name : 'N/A' %></div>
+                                <small class="text-muted"><%= est.client ? est.client.mobile : '' %></small>
+                            </td>
+                            <td>
+                                <div><%= est.client ? est.client.eventName : '' %></div>
+                                <small class="text-muted"><%= est.client ? est.client.venue : '' %></small>
+                            </td>
+                            <td>
+                                <% if (est.minTotal && est.maxTotal && est.minTotal !== est.maxTotal) { %>
+                                    <span class="fw-bold text-success">₹<%= est.minTotal.toLocaleString('en-IN') %> - ₹<%= est.maxTotal.toLocaleString('en-IN') %></span>
+                                <% } else { %>
+                                    <span class="fw-bold text-dark">₹<%= est.grandTotal.toLocaleString('en-IN') %></span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span class="badge bg-<%= est.status === 'Approved' ? 'success-subtle text-success' : est.status === 'Converted' ? 'info-subtle text-info' : est.status === 'Sent' ? 'warning-subtle text-warning' : 'secondary-subtle text-secondary' %>">
+                                    <%= est.status %>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="/admin/invoice-system/estimates/edit/<%= est._id %>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="/admin/invoice-system/print/estimate/<%= est._id %>" target="_blank" class="btn btn-sm btn-outline-dark" title="Print Document"><i class="fas fa-print"></i></a>
+                                    <a href="/admin/invoice-system/print/estimate/<%= est._id %>?download=pdf" target="_blank" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
+                                    <% if (est.status !== 'Converted') { %>
+                                        <form method="POST" action="/admin/invoice-system/estimates/convert/<%= est._id %>" class="d-inline" onsubmit="return confirm('Convert this estimate to an official invoice?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Convert to Invoice"><i class="fas fa-exchange-alt"></i></button>
+                                        </form>
+                                    <% } %>
+                                    <form method="POST" action="/admin/invoice-system/estimates/delete/<%= est._id %>" class="d-inline" onsubmit="return confirm('Delete this estimate?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fas fa-calculator fa-3x mb-3 text-secondary opacity-50"></i>
+                            <div>No estimates found matching criteria</div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>

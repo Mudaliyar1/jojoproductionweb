@@ -1,0 +1,451 @@
+<link rel="stylesheet" href="/css/invoice-system.css">
+
+<!-- Editor Sticky Top Glass Action Toolbar -->
+<form id="editorForm" action="/admin/invoice-system/<%= docType %>s/save" onsubmit="saveDocument(event)">
+    <input type="hidden" name="id" value="<%= doc ? doc._id : '' %>">
+
+    <div class="sticky-top sticky-editor-toolbar p-3 mb-4 shadow-sm" style="top: calc(var(--topbar-height) + 8px); z-index: 1020;">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-<%= docType === 'estimate' ? 'primary' : 'success' %> fs-7 text-uppercase"><%= docType %> Editor</span>
+                <h5 class="mb-0 fw-bold text-dark"><%= doc ? (doc.estimateNumber || doc.invoiceNumber) : autoDocNum %></h5>
+                <% if (doc && doc.version) { %>
+                    <span class="badge bg-light text-secondary border">v<%= doc.version %></span>
+                <% } %>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <!-- Auto vs Manual Calculation Mode -->
+                <button type="button" id="btnCalcMode" class="btn btn-outline-success btn-sm" onclick="toggleCalcMode()">
+                    <i class="fas fa-magic me-1"></i>Auto Calculation Mode
+                </button>
+
+                <!-- Watermark Selector -->
+                <select name="watermark" class="form-select form-select-sm w-auto">
+                    <option value="None" <%= (doc && doc.watermark === 'None') ? 'selected' : '' %>>No Watermark</option>
+                    <option value="Draft" <%= (!doc || doc.watermark === 'Draft') ? 'selected' : '' %>>Draft</option>
+                    <option value="Estimate" <%= (doc && doc.watermark === 'Estimate') ? 'selected' : '' %>>Estimate</option>
+                    <option value="Approved" <%= (doc && doc.watermark === 'Approved') ? 'selected' : '' %>>Approved</option>
+                    <option value="Paid" <%= (doc && doc.watermark === 'Paid') ? 'selected' : '' %>>Paid</option>
+                    <option value="Overdue" <%= (doc && doc.watermark === 'Overdue') ? 'selected' : '' %>>Overdue</option>
+                    <option value="Cancelled" <%= (doc && doc.watermark === 'Cancelled') ? 'selected' : '' %>>Cancelled</option>
+                </select>
+
+                <!-- Template Selector -->
+                <select name="templateId" class="form-select form-select-sm w-auto">
+                    <% if (templates && templates.length > 0) { %>
+                        <% templates.forEach(t => { %>
+                            <option value="<%= t.slug %>" <%= (doc && doc.templateId === t.slug) ? 'selected' : '' %>><%= t.name %> Template</option>
+                        <% }) %>
+                    <% } %>
+                </select>
+
+                <!-- Revision History Restore -->
+                <% if (doc && doc.revisionHistory && doc.revisionHistory.length > 0) { %>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-history me-1"></i>Revisions (<%= doc.revisionHistory.length %>)
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 fs-7">
+                            <% doc.revisionHistory.forEach(r => { %>
+                                <li>
+                                    <a class="dropdown-item py-2" href="/admin/invoice-system/restore-revision/<%= docType %>/<%= doc._id %>/<%= r.version %>">
+                                        Restore v<%= r.version %> (<%= new Date(r.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> by <%= r.updatedBy %>)
+                                    </a>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                <% } %>
+
+                <% if (doc) { %>
+                    <a href="/admin/invoice-system/print/<%= docType %>/<%= doc._id %>" target="_blank" class="btn btn-outline-dark btn-sm">
+                        <i class="fas fa-print me-1"></i>Print / PDF
+                    </a>
+                <% } %>
+
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="fas fa-save me-1"></i>Save Document
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Paper Canvas Container -->
+    <div class="editor-paper-container mb-5">
+        <div class="editor-paper-canvas">
+            <!-- Company & Document Info Card Section -->
+            <div class="row g-4 pb-4 mb-4 border-bottom">
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-none bg-light p-3">
+                        <h6 class="fw-bold text-uppercase text-secondary mb-3 fs-8">Company Branding & Details</h6>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <% const logoPath = (doc && doc.companyDetails && doc.companyDetails.logoUrl && doc.companyDetails.logoUrl.startsWith('http')) ? doc.companyDetails.logoUrl : (settings && settings.logoUrl ? settings.logoUrl : ''); %>
+                                <input type="hidden" name="companyLogoUrl" value="<%= logoPath %>">
+                                <% if (logoPath) { %>
+                                    <div class="mb-2">
+                                        <img src="<%= logoPath %>" alt="Company Logo" style="max-height: 45px;" class="rounded border p-1 bg-white">
+                                    </div>
+                                <% } %>
+                                <input type="text" name="companyName" class="form-control form-control-lg fw-bold text-dark border-0 bg-white" value="<%= doc ? (doc.companyDetails.companyName || settings.companyName) : settings.companyName %>">
+                            </div>
+                            <div class="col-12">
+                                <input type="text" name="companyTagline" class="form-control form-control-sm border-0 text-muted" value="<%= doc ? (doc.companyDetails.tagline || settings.tagline) : settings.tagline %>" placeholder="Tagline">
+                            </div>
+                            <div class="col-12">
+                                <textarea name="companyAddress" class="form-control form-control-sm border-0 text-secondary" rows="2"><%= doc ? (doc.companyDetails.address || settings.address) : settings.address %></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="companyPhone" class="form-control form-control-sm border-0" value="<%= doc ? (doc.companyDetails.phone || settings.phone) : settings.phone %>" placeholder="Phone">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="companyEmail" class="form-control form-control-sm border-0" value="<%= doc ? (doc.companyDetails.email || settings.email) : settings.email %>" placeholder="Email">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="companyGst" class="form-control form-control-sm border-0 fw-semibold text-primary" value="<%= doc ? (doc.companyDetails.gstNumber || settings.gstNumber) : settings.gstNumber %>" placeholder="GSTIN">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="companyPan" class="form-control form-control-sm border-0 fw-semibold" value="<%= doc ? (doc.companyDetails.panNumber || settings.panNumber) : settings.panNumber %>" placeholder="PAN Number">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-none bg-light p-3 h-100 text-lg-end">
+                        <h3 class="text-uppercase fw-bold text-dark mb-2"><%= docType === 'estimate' ? 'ESTIMATE' : 'INVOICE' %></h3>
+                        <div class="row g-2 justify-content-lg-end text-start">
+                            <div class="col-md-10">
+                                <label class="fs-8 text-muted fw-bold">Document Number</label>
+                                <input type="text" name="<%= docType %>Number" class="form-control form-control-sm fw-bold text-primary" value="<%= doc ? (doc.estimateNumber || doc.invoiceNumber) : autoDocNum %>">
+                            </div>
+                            <div class="col-md-10">
+                                <label class="fs-8 text-muted fw-bold">Date</label>
+                                <input type="date" name="<%= docType === 'estimate' ? 'estimateDate' : 'invoiceDate' %>" class="form-control form-control-sm" value="<%= doc ? new Date(doc.estimateDate || doc.invoiceDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0] %>">
+                            </div>
+                            <div class="col-md-10">
+                                <label class="fs-8 text-muted fw-bold"><%= docType === 'estimate' ? 'Expiry Date' : 'Due Date' %></label>
+                                <input type="date" name="<%= docType === 'estimate' ? 'expiryDate' : 'dueDate' %>" class="form-control form-control-sm" value="<%= doc && (doc.expiryDate || doc.dueDate) ? new Date(doc.expiryDate || doc.dueDate).toISOString().split('T')[0] : '' %>">
+                            </div>
+                            <div class="col-md-10">
+                                <label class="fs-8 text-muted fw-bold">Status</label>
+                                <select name="status" class="form-select form-select-sm">
+                                    <% if (docType === 'estimate') { %>
+                                        <option value="Draft" <%= (doc && doc.status === 'Draft') ? 'selected' : '' %>>Draft</option>
+                                        <option value="Sent" <%= (doc && doc.status === 'Sent') ? 'selected' : '' %>>Sent</option>
+                                        <option value="Approved" <%= (doc && doc.status === 'Approved') ? 'selected' : '' %>>Approved</option>
+                                        <option value="Rejected" <%= (doc && doc.status === 'Rejected') ? 'selected' : '' %>>Rejected</option>
+                                        <option value="Converted" <%= (doc && doc.status === 'Converted') ? 'selected' : '' %>>Converted</option>
+                                    <% } else { %>
+                                        <option value="Draft" <%= (doc && doc.status === 'Draft') ? 'selected' : '' %>>Draft</option>
+                                        <option value="Unpaid" <%= (doc && doc.status === 'Unpaid') ? 'selected' : '' %>>Unpaid</option>
+                                        <option value="Partially Paid" <%= (doc && doc.status === 'Partially Paid') ? 'selected' : '' %>>Partially Paid</option>
+                                        <option value="Paid" <%= (doc && doc.status === 'Paid') ? 'selected' : '' %>>Paid</option>
+                                        <option value="Overdue" <%= (doc && doc.status === 'Overdue') ? 'selected' : '' %>>Overdue</option>
+                                        <option value="Cancelled" <%= (doc && doc.status === 'Cancelled') ? 'selected' : '' %>>Cancelled</option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client & Event Info Section -->
+            <div class="row g-4 mb-4 p-3 bg-light rounded-3 border">
+                <div class="col-lg-6 border-lg-end pe-lg-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-uppercase text-secondary mb-0">Billed To / Client Details</h6>
+                        <select id="clientSelector" class="form-select form-select-sm w-auto">
+                            <option value="">-- Select Saved Client --</option>
+                            <% if (clients && clients.length > 0) { %>
+                                <% clients.forEach(c => { %>
+                                    <option value="<%= c._id %>" data-client='<%- JSON.stringify(c) %>'><%= c.name %> (<%= c.mobile %>)</option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <input type="text" name="clientName" id="cNameInput" class="form-control form-control-sm fw-bold" placeholder="Client Name *" value="<%= doc && doc.client ? doc.client.name : '' %>" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="clientMobile" id="cMobileInput" class="form-control form-control-sm" placeholder="Mobile Number *" value="<%= doc && doc.client ? doc.client.mobile : '' %>" required>
+                        </div>
+                        <div class="col-12">
+                            <input type="email" name="clientEmail" id="cEmailInput" class="form-control form-control-sm" placeholder="Email Address" value="<%= doc && doc.client ? doc.client.email : '' %>">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="clientAddress" id="cAddressInput" class="form-control form-control-sm" placeholder="Full Address" value="<%= doc && doc.client ? doc.client.address : '' %>">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 ps-lg-4">
+                    <h6 class="fw-bold text-uppercase text-primary mb-3">Event Details</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <input type="text" name="eventName" id="cEventNameInput" class="form-control form-control-sm fw-semibold text-primary" placeholder="Event Name (e.g. Wedding Reception)" value="<%= doc && doc.client ? doc.client.eventName : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="date" name="eventDate" id="cEventDateInput" class="form-control form-control-sm" value="<%= doc && doc.client && doc.client.eventDate ? new Date(doc.client.eventDate).toISOString().split('T')[0] : '' %>">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" name="venue" id="cVenueInput" class="form-control form-control-sm" placeholder="Venue Address" value="<%= doc && doc.client ? doc.client.venue : '' %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Services Line Items Table -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0"><i class="fas fa-list-ol me-2 text-primary"></i>Service Line Items</h6>
+                    <button type="button" class="btn btn-sm btn-success" onclick="addServiceRow()">
+                        <i class="fas fa-plus me-1"></i>Add Item Row
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0 line-items-table">
+                        <thead class="table-dark small text-uppercase">
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th style="width: 220px;">Preset Catalog Service</th>
+                                <th style="width: 240px;">Item Description</th>
+                                <th style="width: 75px;">Qty</th>
+                                <th style="width: 90px;">Unit</th>
+                                <th style="width: 220px;">Rate (Fixed / Min-Max ₹)</th>
+                                <th style="width: 75px;">GST %</th>
+                                <th style="width: 130px;" class="text-end">Total Amount</th>
+                                <th style="width: 85px;" class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="editorItemsBody">
+                            <% if (doc && doc.items && doc.items.length > 0) { %>
+                                <% doc.items.forEach((item, index) => { %>
+                                    <tr>
+                                        <td class="text-center fw-bold"><span class="row-num"><%= index + 1 %></span></td>
+                                        <td>
+                                            <select class="form-select form-select-sm" onchange="onServiceSelect(this)">
+                                                <option value="">-- Preset Service --</option>
+                                                <% if (services && services.length > 0) { %>
+                                                    <% services.forEach(s => { %>
+                                                        <option value="<%= s._id %>" data-service='<%- JSON.stringify(s) %>' <%= (item.serviceId === String(s._id)) ? 'selected' : '' %>><%= s.name %> (₹<%= s.defaultPrice %>)</option>
+                                                    <% }) %>
+                                                <% } %>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm item-desc" value="<%= item.description %>" placeholder="Description" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control form-control-sm item-qty text-center" value="<%= item.quantity %>" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm item-unit" value="<%= item.unit || 'Event' %>">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 align-items-center">
+                                                <select class="form-select form-select-sm w-auto item-pricetype" onchange="toggleRowRangeFields(this.closest('tr'))">
+                                                    <option value="fixed" <%= item.priceType === 'fixed' ? 'selected' : '' %>>Fixed</option>
+                                                    <option value="range" <%= item.priceType === 'range' ? 'selected' : '' %>>Range</option>
+                                                </select>
+                                                <input type="number" step="0.01" class="form-control form-control-sm item-rate" value="<%= item.rate %>" placeholder="Rate">
+                                                <input type="number" step="0.01" class="form-control form-control-sm item-maxrate <%= item.priceType === 'range' ? '' : 'd-none' %>" value="<%= item.maxRate || 0 %>" placeholder="Max Rate">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm item-gst text-center" value="<%= item.gstPercent %>">
+                                        </td>
+                                        <td class="text-end fw-bold">
+                                            <span class="item-total-text">₹<%= item.amount.toLocaleString('en-IN') %></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="duplicateRow(this)" title="Duplicate"><i class="fas fa-copy"></i></button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeServiceRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <!-- Default Blank Row -->
+                                <tr>
+                                    <td class="text-center fw-bold"><span class="row-num">1</span></td>
+                                    <td>
+                                        <select class="form-select form-select-sm" onchange="onServiceSelect(this)">
+                                            <option value="">-- Preset Service --</option>
+                                            <% if (services && services.length > 0) { %>
+                                                <% services.forEach(s => { %>
+                                                    <option value="<%= s._id %>" data-service='<%- JSON.stringify(s) %>'><%= s.name %> (₹<%= s.defaultPrice %>)</option>
+                                                <% }) %>
+                                            <% } %>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm item-desc" placeholder="Service Description" required></td>
+                                    <td><input type="number" step="0.01" class="form-control form-control-sm item-qty text-center" value="1" required></td>
+                                    <td><input type="text" class="form-control form-control-sm item-unit" value="Event"></td>
+                                    <td>
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <select class="form-select form-select-sm w-auto item-pricetype" onchange="toggleRowRangeFields(this.closest('tr'))">
+                                                <option value="fixed">Fixed</option>
+                                                <option value="range">Range</option>
+                                            </select>
+                                            <input type="number" step="0.01" class="form-control form-control-sm item-rate" value="0" placeholder="Rate">
+                                            <input type="number" step="0.01" class="form-control form-control-sm item-maxrate d-none" value="0" placeholder="Max Rate">
+                                        </div>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm item-gst text-center" value="18"></td>
+                                    <td class="text-end fw-bold"><span class="item-total-text">₹0</span></td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="duplicateRow(this)" title="Duplicate"><i class="fas fa-copy"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeServiceRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary & Banking Details Section -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-none bg-light p-3 h-100">
+                        <h6 class="fw-bold text-dark mb-3">Banking & UPI Payment Info</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="fs-8 text-muted">Bank Name</label>
+                                <input type="text" name="bankName" class="form-control form-control-sm" value="<%= doc ? (doc.companyDetails.bankName || settings.bankName) : settings.bankName %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fs-8 text-muted">Account Number</label>
+                                <input type="text" name="accountNumber" class="form-control form-control-sm" value="<%= doc ? (doc.companyDetails.accountNumber || settings.accountNumber) : settings.accountNumber %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fs-8 text-muted">IFSC Code</label>
+                                <input type="text" name="ifscCode" class="form-control form-control-sm" value="<%= doc ? (doc.companyDetails.ifscCode || settings.ifscCode) : settings.ifscCode %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fs-8 text-muted">UPI ID</label>
+                                <input type="text" name="upiId" class="form-control form-control-sm text-success fw-bold" value="<%= doc ? (doc.companyDetails.upiId || settings.upiId) : settings.upiId %>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="summary-card p-4">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Financial Totals Summary</h6>
+                        <table class="table table-sm table-borderless text-end mb-0">
+                            <tr>
+                                <td class="fw-semibold text-muted">Subtotal:</td>
+                                <td style="width: 50%;">
+                                    <input type="number" step="0.01" name="subtotal" id="inputSubtotal" class="form-control form-control-sm text-end fw-bold" value="<%= doc ? doc.subtotal : 0 %>" readonly>
+                                    <input type="hidden" name="minTotal" id="inputMinTotal" value="<%= doc ? doc.minTotal : 0 %>">
+                                    <input type="hidden" name="maxTotal" id="inputMaxTotal" value="<%= doc ? doc.maxTotal : 0 %>">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">Discount (₹):</td>
+                                <td>
+                                    <input type="number" step="0.01" name="discountTotal" id="inputDiscount" class="form-control form-control-sm text-end text-danger" value="<%= doc ? doc.discountTotal : 0 %>" oninput="recalculateTotals()">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">GST Tax Total:</td>
+                                <td>
+                                    <input type="number" step="0.01" name="gstTotal" id="inputGstTotal" class="form-control form-control-sm text-end" value="<%= doc ? doc.gstTotal : 0 %>" readonly>
+                                    <input type="hidden" name="cgst" id="inputCgst" value="<%= doc ? doc.cgst : 0 %>">
+                                    <input type="hidden" name="sgst" id="inputSgst" value="<%= doc ? doc.sgst : 0 %>">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">Transport Charges:</td>
+                                <td>
+                                    <input type="number" step="0.01" name="transportCharges" id="inputTransport" class="form-control form-control-sm text-end" value="<%= doc ? doc.transportCharges : 0 %>" oninput="recalculateTotals()">
+                                </td>
+                            </tr>
+                            <tr class="border-top border-bottom">
+                                <td class="fw-bold fs-6 text-dark py-2">Grand Total:</td>
+                                <td class="py-2">
+                                    <input type="number" step="0.01" name="grandTotal" id="inputGrandTotal" class="form-control form-control-sm text-end fw-bold text-primary fs-6" value="<%= doc ? doc.grandTotal : 0 %>" readonly>
+                                    <div class="fs-8 text-success fw-bold mt-1" id="dispGrandTotal"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">Advance Payment:</td>
+                                <td>
+                                    <input type="number" step="0.01" name="advancePaid" id="inputAdvance" class="form-control form-control-sm text-end text-success fw-bold" value="<%= doc ? doc.advancePaid : 0 %>" oninput="recalculateTotals()">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-danger">Balance Due:</td>
+                                <td>
+                                    <input type="number" step="0.01" name="balanceDue" id="inputBalanceDue" class="form-control form-control-sm text-end text-danger fw-bold fs-6" value="<%= doc ? doc.balanceDue : 0 %>" readonly>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes & Terms Card Section -->
+            <div class="row g-3 border-top pt-3">
+                <div class="col-md-6">
+                    <label class="fw-bold text-dark fs-7 mb-1">Client Notes</label>
+                    <textarea name="notes" class="form-control form-control-sm" rows="3"><%= doc ? doc.notes : settings.defaultNotes %></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="fw-bold text-dark fs-7 mb-1">Terms & Conditions</label>
+                    <textarea name="terms" class="form-control form-control-sm" rows="3"><%= doc ? doc.terms : settings.defaultTerms %></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Service Row Template -->
+<template id="rowTemplate">
+    <tr>
+        <td class="text-center fw-bold"><span class="row-num"></span></td>
+        <td>
+            <select class="form-select form-select-sm" onchange="onServiceSelect(this)">
+                <option value="">-- Preset Service --</option>
+                <% if (services && services.length > 0) { %>
+                    <% services.forEach(s => { %>
+                        <option value="<%= s._id %>" data-service='<%- JSON.stringify(s) %>'><%= s.name %> (₹<%= s.defaultPrice %>)</option>
+                    <% }) %>
+                <% } %>
+            </select>
+        </td>
+        <td><input type="text" class="form-control form-control-sm item-desc" placeholder="Service Description" required></td>
+        <td><input type="number" step="0.01" class="form-control form-control-sm item-qty text-center" value="1" required></td>
+        <td><input type="text" class="form-control form-control-sm item-unit" value="Event"></td>
+        <td>
+            <div class="d-flex gap-1 align-items-center">
+                <select class="form-select form-select-sm w-auto item-pricetype" onchange="toggleRowRangeFields(this.closest('tr'))">
+                    <option value="fixed">Fixed</option>
+                    <option value="range">Range</option>
+                </select>
+                <input type="number" step="0.01" class="form-control form-control-sm item-rate" value="0" placeholder="Rate">
+                <input type="number" step="0.01" class="form-control form-control-sm item-maxrate d-none" value="0" placeholder="Max Rate">
+            </div>
+        </td>
+        <td><input type="number" class="form-control form-control-sm item-gst text-center" value="18"></td>
+        <td class="text-end fw-bold"><span class="item-total-text">₹0</span></td>
+        <td class="text-center">
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="duplicateRow(this)" title="Duplicate"><i class="fas fa-copy"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeServiceRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
+            </div>
+        </td>
+    </tr>
+</template>
+
+<script src="/js/invoice-editor.js"></script>

@@ -1,0 +1,215 @@
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <form method="GET" action="/admin/invoice-system/clients" class="d-flex gap-2 flex-grow-1 max-w-500">
+                <input type="text" name="search" class="form-control" placeholder="Search by name, mobile, email, city..." value="<%= search %>">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#clientModal" onclick="resetClientForm()">
+                    <i class="fas fa-user-plus me-1"></i>Add Client
+                </button>
+                <a href="/admin/invoice-system/clients/export" class="btn btn-outline-dark">
+                    <i class="fas fa-download me-1"></i>Export JSON
+                </a>
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <i class="fas fa-upload me-1"></i>Import JSON
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-address-book me-2 text-primary"></i>Client Management Directory</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Client Name</th>
+                    <th>Mobile / Email</th>
+                    <th>Event Details</th>
+                    <th>Location</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (clients && clients.length > 0) { %>
+                    <% clients.forEach(c => { %>
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark"><%= c.name %></div>
+                                <% if (c.panNumber) { %><small class="text-muted">PAN: <%= c.panNumber %></small><% } %>
+                            </td>
+                            <td>
+                                <div><i class="fas fa-phone-alt me-1 text-muted fs-8"></i><%= c.mobile %></div>
+                                <% if (c.altMobile) { %><small class="text-muted"><%= c.altMobile %></small><br><% } %>
+                                <% if (c.email) { %><small class="text-muted"><%= c.email %></small><% } %>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-primary"><%= c.eventName || '-' %></div>
+                                <small class="text-muted">
+                                    <%= c.eventDate ? new Date(c.eventDate).toLocaleDateString('en-IN') : '' %>
+                                </small>
+                                <% if (c.venue) { %><div class="fs-8 text-muted"><i class="fas fa-map-marker-alt me-1"></i><%= c.venue %></div><% } %>
+                            </td>
+                            <td>
+                                <div><%= c.city || '' %>, <%= c.state || '' %></div>
+                                <small class="text-muted"><%= c.pincode || '' %></small>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-client="<%= JSON.stringify(c) %>" onclick="onEditClientClick(this)"><i class="fas fa-edit"></i></button>
+                                <form method="POST" action="/admin/invoice-system/clients/delete/<%= c._id %>" class="d-inline" onsubmit="return confirm('Delete client record?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No clients found</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Client Form Modal -->
+<div class="modal fade" id="clientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="/admin/invoice-system/clients/save" id="clientForm">
+                <input type="hidden" name="id" id="clientId">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="clientModalTitle">Add New Client</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label required">Client Name</label>
+                            <input type="text" name="name" id="cName" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required">Mobile Number</label>
+                            <input type="text" name="mobile" id="cMobile" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Alt Mobile Number</label>
+                            <input type="text" name="altMobile" id="cAltMobile" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" id="cEmail" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">PAN Number</label>
+                            <input type="text" name="panNumber" id="cPanNumber" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="address" id="cAddress" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" id="cCity" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">State</label>
+                            <input type="text" name="state" id="cState" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Country</label>
+                            <input type="text" name="country" id="cCountry" class="form-control" value="India">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">PIN Code</label>
+                            <input type="text" name="pincode" id="cPincode" class="form-control">
+                        </div>
+                        <hr class="my-2">
+                        <h6 class="fw-bold text-primary mb-0">Event Details</h6>
+                        <div class="col-md-6">
+                            <label class="form-label">Event Name</label>
+                            <input type="text" name="eventName" id="cEventName" class="form-control" placeholder="Wedding / DJ Night">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Event Date</label>
+                            <input type="date" name="eventDate" id="cEventDate" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Venue</label>
+                            <input type="text" name="venue" id="cVenue" class="form-control" placeholder="Hotel Hyatt Regency, Grand Ballroom">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <textarea name="notes" id="cNotes" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Save Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="/admin/invoice-system/clients/import">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Import Clients (JSON)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Paste JSON Client Array</label>
+                        <textarea name="clientData" class="form-control font-monospace" rows="8" placeholder='[{"name": "John Doe", "mobile": "9876543210"}]' required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function onEditClientClick(btn) {
+    const c = JSON.parse(btn.dataset.client);
+    editClient(c);
+}
+
+function resetClientForm() {
+    document.getElementById('clientForm').reset();
+    document.getElementById('clientId').value = '';
+    document.getElementById('clientModalTitle').innerText = 'Add New Client';
+}
+
+function editClient(c) {
+    document.getElementById('clientId').value = c._id || '';
+    document.getElementById('cName').value = c.name || '';
+    document.getElementById('cMobile').value = c.mobile || '';
+    document.getElementById('cAltMobile').value = c.altMobile || '';
+    document.getElementById('cEmail').value = c.email || '';
+    document.getElementById('cPanNumber').value = c.panNumber || '';
+    document.getElementById('cAddress').value = c.address || '';
+    document.getElementById('cCity').value = c.city || '';
+    document.getElementById('cState').value = c.state || '';
+    document.getElementById('cCountry').value = c.country || 'India';
+    document.getElementById('cPincode').value = c.pincode || '';
+    document.getElementById('cEventName').value = c.eventName || '';
+    document.getElementById('cEventDate').value = c.eventDate ? c.eventDate.split('T')[0] : '';
+    document.getElementById('cVenue').value = c.venue || '';
+    document.getElementById('cNotes').value = c.notes || '';
+    document.getElementById('clientModalTitle').innerText = 'Edit Client - ' + c.name;
+    var modal = new bootstrap.Modal(document.getElementById('clientModal'));
+    modal.show();
+}
+</script>

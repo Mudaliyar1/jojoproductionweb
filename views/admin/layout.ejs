@@ -3,148 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= (typeof title !== 'undefined' && title) ? title : 'Admin' %> - Jojo's Production Admin</title>
+    <title><%= (typeof title !== 'undefined' && title) ? title : 'Admin' %> - Jojo's Production</title>
     
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Font Awesome -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS -->
+    <!-- Enterprise Admin CSS -->
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
-    <!-- Top Navigation -->
-    <!-- Admin Layout Identifier -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="/admin">
-                <i class="fas fa-video me-2"></i>
-                <span class="brand-text">Jojo's Production</span>
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-expanded="true" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <% if (user && user.name) { %>
-                                <img src="/admin/placeholder-avatar/<%= user.name.charAt(0) %>?size=32&bgColor=6c757d&textColor=ffffff" alt="User Avatar" class="rounded-circle" width="32" height="32">
-                                <%= user.name %>
-                            <% } else { %>
-                                <img src="/admin/placeholder-avatar/A?size=32&bgColor=6c757d&textColor=ffffff" alt="Admin Avatar" class="rounded-circle" width="32" height="32">
-                                Admin
-                            <% } %>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
+    <!-- Top Navigation Header -->
+    <nav class="navbar navbar-expand-lg fixed-top admin-navbar px-3">
+        <div class="container-fluid p-0">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Mobile / Desktop Sidebar Toggle -->
+                <button class="btn topbar-icon-btn border-0" type="button" id="sidebarToggleBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Brand Logo -->
+                <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/admin">
+                    <div class="brand-logo-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <span class="brand-text">Jojo's Production</span>
+                </a>
+
+                <!-- Breadcrumb Tracker (Desktop) -->
+                <nav aria-label="breadcrumb" class="d-none d-md-block ms-3">
+                    <ol class="breadcrumb admin-breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/admin" class="text-decoration-none text-muted">Admin</a></li>
+                        <% if (typeof activeGroup !== 'undefined' && activeGroup === 'invoice-system') { %>
+                            <li class="breadcrumb-item"><a href="/admin/invoice-system" class="text-decoration-none text-muted">Invoice Management</a></li>
+                            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page"><%= (typeof title !== 'undefined' && title) ? title : 'Overview' %></li>
+                        <% } else { %>
+                            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page"><%= (typeof title !== 'undefined' && title) ? title : 'Dashboard' %></li>
+                        <% } %>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Search Bar Input -->
+                <div class="position-relative topbar-search-container">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control topbar-search-input" placeholder="Search invoices, clients...">
+                </div>
+
+                <!-- Notification Bell -->
+                <button type="button" class="btn topbar-icon-btn" title="Notifications">
+                    <i class="far fa-bell"></i>
+                    <span class="ping-dot"></span>
+                </button>
+
+                <!-- User Profile Dropdown -->
+                <div class="dropdown ms-2">
+                    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <% if (user && user.name) { %>
+                            <img src="/admin/placeholder-avatar/<%= user.name.charAt(0) %>?size=36&bgColor=4f46e5&textColor=ffffff" alt="Avatar" class="user-avatar-img me-2">
+                            <div class="d-none d-lg-block text-start">
+                                <div class="fw-bold text-dark fs-7 leading-tight"><%= user.name %></div>
+                                <div class="text-muted fs-8 text-capitalize"><%= user.role || 'Admin' %></div>
+                            </div>
+                        <% } else { %>
+                            <img src="/admin/placeholder-avatar/A?size=36&bgColor=4f46e5&textColor=ffffff" alt="Avatar" class="user-avatar-img me-2">
+                            <div class="d-none d-lg-block text-start">
+                                <div class="fw-bold text-dark fs-7 leading-tight">Admin User</div>
+                                <div class="text-muted fs-8">Administrator</div>
+                            </div>
+                        <% } %>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2">
+                        <li>
+                            <div class="px-3 py-2 border-bottom">
+                                <div class="fw-bold text-dark"><%= (user && user.name) ? user.name : 'Admin' %></div>
+                                <div class="small text-muted"><%= (user && user.email) ? user.email : 'admin@gmail.com' %></div>
+                            </div>
+                        </li>
+                        <li><a class="dropdown-item py-2" href="/admin/profile"><i class="fas fa-user-circle me-2 text-primary"></i>Profile Settings</a></li>
+                        <li><a class="dropdown-item py-2" href="/admin/invoice-system/settings"><i class="fas fa-cogs me-2 text-info"></i>Invoice Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="sidebar-nav collapse show" id="adminSidebar">
-                <div class="sidebar-header d-flex justify-content-between align-items-center px-3 mt-2">
-                    <h5 class="text-white mb-0">Admin Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="Close" data-bs-toggle="collapse" data-bs-target="#adminSidebar"></button>
-                </div>
-                
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link <%= active === 'dashboard' ? 'active' : '' %>" href="/admin">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= active === 'users' ? 'active' : '' %>" href="/admin/users">
-                                <i class="fas fa-users me-2"></i>
-                                User Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= active === 'inquiries' ? 'active' : '' %>" href="/admin/inquiries">
-                                <i class="fas fa-envelope me-2"></i>
-                                Inquiry Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= active === 'services' ? 'active' : '' %>" href="/admin/services">
-                                <i class="fas fa-concierge-bell me-2"></i>
-                                Service Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= active === 'about' ? 'active' : '' %>" href="/admin/about">
-                                <i class="fas fa-info-circle me-2"></i>
-                                About Management
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <%= active === 'team' ? 'active' : '' %>" href="/admin/team">
-                                <i class="fas fa-user-friends me-2"></i>
-                                Team Management
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+    <!-- Sidebar Mobile Backdrop Drawer Overlay -->
+    <div class="sidebar-overlay" id="sidebarBackdropOverlay" onclick="toggleSidebar()"></div>
 
-            <!-- Main Content -->
-            <main class="main-content px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><%= (typeof title !== 'undefined' && title) ? title : 'Admin' %></h1>
-                    <% if (typeof showAddButton !== 'undefined' && showAddButton) { %>
-                        <div class="btn-toolbar mb-2 mb-md-0">
-                            <div class="btn-group me-2">
-                                <a href="<%= addButtonUrl %>" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-plus me-1"></i>
-                                    <%= addButtonText %>
+    <!-- Fixed Dark Slate Sidebar Navigation -->
+    <aside class="sidebar-nav" id="adminSidebar">
+        <div class="py-2">
+            <!-- MAIN MANAGEMENT CATEGORY -->
+            <div class="sidebar-category-title">Main Portal</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link <%= active === 'dashboard' ? 'active' : '' %>" href="/admin">
+                        <span><i class="fas fa-home link-icon"></i>Website Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= active === 'users' ? 'active' : '' %>" href="/admin/users">
+                        <span><i class="fas fa-users-cog link-icon"></i>User Accounts</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= active === 'inquiries' ? 'active' : '' %>" href="/admin/inquiries">
+                        <span><i class="fas fa-inbox link-icon"></i>Inquiries & Leads</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= active === 'services' ? 'active' : '' %>" href="/admin/services">
+                        <span><i class="fas fa-concierge-bell link-icon"></i>Website Services</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- INVOICE & ESTIMATE MODULE CATEGORY -->
+            <div class="sidebar-category-title">ERP & Financial System</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-white d-flex align-items-center justify-content-between" data-bs-toggle="collapse" href="#invoiceSystemMenu" role="button" aria-expanded="<%= (typeof activeGroup !== 'undefined' && activeGroup === 'invoice-system') ? 'true' : 'false' %>">
+                        <span><i class="fas fa-file-invoice-dollar link-icon text-primary"></i>Invoice Management</span>
+                        <i class="fas fa-chevron-down fs-8 transition-transform"></i>
+                    </a>
+                    <div class="collapse sidebar-child-menu <%= (typeof activeGroup !== 'undefined' && activeGroup === 'invoice-system') ? 'show' : '' %>" id="invoiceSystemMenu">
+                        <ul class="nav flex-column pt-1">
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'dashboard') ? 'active' : '' %>" href="/admin/invoice-system">
+                                    <i class="fas fa-chart-line link-icon"></i>Dashboard
                                 </a>
-                            </div>
-                        </div>
-                    <% } %>
-                </div>
-
-                <!-- Flash Messages -->
-                <% if (success_msg && success_msg.length > 0) { %>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <%= success_msg %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'create-estimate') ? 'active' : '' %>" href="/admin/invoice-system/estimates/create">
+                                    <i class="fas fa-plus-circle link-icon"></i>Create Estimate
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'create-invoice') ? 'active' : '' %>" href="/admin/invoice-system/invoices/create">
+                                    <i class="fas fa-plus-square link-icon"></i>Create Invoice
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'estimates') ? 'active' : '' %>" href="/admin/invoice-system/estimates">
+                                    <i class="fas fa-calculator link-icon"></i>All Estimates
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'invoices') ? 'active' : '' %>" href="/admin/invoice-system/invoices">
+                                    <i class="fas fa-receipt link-icon"></i>All Invoices
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'drafts') ? 'active' : '' %>" href="/admin/invoice-system/drafts">
+                                    <i class="fas fa-first-draft link-icon"></i>Drafts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'clients') ? 'active' : '' %>" href="/admin/invoice-system/clients">
+                                    <i class="fas fa-address-book link-icon"></i>Clients CRM
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'services') ? 'active' : '' %>" href="/admin/invoice-system/services">
+                                    <i class="fas fa-list-alt link-icon"></i>Services Catalog
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'templates') ? 'active' : '' %>" href="/admin/invoice-system/templates">
+                                    <i class="fas fa-palette link-icon"></i>Templates
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'settings') ? 'active' : '' %>" href="/admin/invoice-system/settings">
+                                    <i class="fas fa-cogs link-icon"></i>System Settings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'reports') ? 'active' : '' %>" href="/admin/invoice-system/reports">
+                                    <i class="fas fa-chart-pie link-icon"></i>Financial Reports
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof activeSub !== 'undefined' && activeSub === 'logs') ? 'active' : '' %>" href="/admin/invoice-system/logs">
+                                    <i class="fas fa-history link-icon"></i>Audit Activity Logs
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                <% } %>
-                <% if (error_msg && error_msg.length > 0) { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <%= error_msg %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
-
-                <!-- Page Content -->
-                <%- body %>
-            </main>
+                </li>
+            </ul>
         </div>
-    </div>
+    </aside>
 
-    <!-- Bootstrap JS -->
+    <!-- Main Content Area -->
+    <main class="main-content px-3 px-md-4">
+        <!-- Flash Alerts -->
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i><%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i><%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <!-- Dynamic View Content -->
+        <%- body %>
+    </main>
+
+    <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom JS -->
-    <script src="/js/admin.js"></script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarBackdropOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        document.getElementById('sidebarToggleBtn').addEventListener('click', toggleSidebar);
+    </script>
 </body>
 </html>

@@ -1,0 +1,73 @@
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-file-signature me-2"></i>Draft Estimates</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Est #</th>
+                            <th>Client Name</th>
+                            <th>Amount</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (draftEstimates && draftEstimates.length > 0) { %>
+                            <% draftEstimates.forEach(est => { %>
+                                <tr>
+                                    <td class="fw-bold text-primary"><%= est.estimateNumber %></td>
+                                    <td><%= est.client ? est.client.name : 'N/A' %></td>
+                                    <td class="fw-semibold">₹<%= est.grandTotal.toLocaleString('en-IN') %></td>
+                                    <td class="text-end">
+                                        <a href="/admin/invoice-system/estimates/edit/<%= est._id %>" class="btn btn-sm btn-primary">Resume Draft</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" class="text-center py-4 text-muted">No draft estimates found</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-file-invoice me-2 text-success"></i>Draft Invoices</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Inv #</th>
+                            <th>Client Name</th>
+                            <th>Amount</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (draftInvoices && draftInvoices.length > 0) { %>
+                            <% draftInvoices.forEach(inv => { %>
+                                <tr>
+                                    <td class="fw-bold text-dark"><%= inv.invoiceNumber %></td>
+                                    <td><%= inv.client ? inv.client.name : 'N/A' %></td>
+                                    <td class="fw-semibold">₹<%= inv.grandTotal.toLocaleString('en-IN') %></td>
+                                    <td class="text-end">
+                                        <a href="/admin/invoice-system/invoices/edit/<%= inv._id %>" class="btn btn-sm btn-primary">Resume Draft</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" class="text-center py-4 text-muted">No draft invoices found</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+<!-- Filter Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="/admin/invoice-system/invoices" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="position-relative">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" name="search" class="form-control ps-5" placeholder="Search by invoice #, client name, mobile..." value="<%= search %>">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Payment Statuses</option>
+                    <option value="Draft" <%= statusFilter === 'Draft' ? 'selected' : '' %>>Draft</option>
+                    <option value="Unpaid" <%= statusFilter === 'Unpaid' ? 'selected' : '' %>>Unpaid</option>
+                    <option value="Partially Paid" <%= statusFilter === 'Partially Paid' ? 'selected' : '' %>>Partially Paid</option>
+                    <option value="Paid" <%= statusFilter === 'Paid' ? 'selected' : '' %>>Paid</option>
+                    <option value="Overdue" <%= statusFilter === 'Overdue' ? 'selected' : '' %>>Overdue</option>
+                    <option value="Cancelled" <%= statusFilter === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i>Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Directory Card -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-file-invoice-dollar me-2 text-success"></i>Invoices Directory</h5>
+        <a href="/admin/invoice-system/invoices/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>New Invoice</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Date / Due</th>
+                    <th>Client Name</th>
+                    <th>Grand Total</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (invoices && invoices.length > 0) { %>
+                    <% invoices.forEach(inv => { %>
+                        <tr>
+                            <td>
+                                <a href="/admin/invoice-system/invoices/edit/<%= inv._id %>" class="fw-bold text-dark text-decoration-none">
+                                    <%= inv.invoiceNumber %>
+                                </a>
+                                <% if (inv.estimateNumber) { %>
+                                    <div class="fs-8 text-muted">From: <%= inv.estimateNumber %></div>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div><%= new Date(inv.invoiceDate).toLocaleDateString('en-IN') %></div>
+                                <small class="text-muted">Due: <%= inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN') : 'N/A' %></small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark"><%= inv.client ? inv.client.name : 'N/A' %></div>
+                                <small class="text-muted"><%= inv.client ? inv.client.mobile : '' %></small>
+                            </td>
+                            <td class="fw-bold text-dark">₹<%= inv.grandTotal.toLocaleString('en-IN') %></td>
+                            <td class="text-success fw-semibold">₹<%= inv.advancePaid.toLocaleString('en-IN') %></td>
+                            <td class="fw-bold text-danger">₹<%= inv.balanceDue.toLocaleString('en-IN') %></td>
+                            <td>
+                                <span class="badge bg-<%= inv.status === 'Paid' ? 'success-subtle text-success' : inv.status === 'Partially Paid' ? 'warning-subtle text-warning' : inv.status === 'Unpaid' ? 'danger-subtle text-danger' : 'secondary-subtle text-secondary' %>">
+                                    <%= inv.status %>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="/admin/invoice-system/invoices/edit/<%= inv._id %>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="/admin/invoice-system/print/invoice/<%= inv._id %>" target="_blank" class="btn btn-sm btn-outline-dark" title="Print Document"><i class="fas fa-print"></i></a>
+                                    <a href="/admin/invoice-system/print/invoice/<%= inv._id %>?download=pdf" target="_blank" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
+                                    <% if (inv.status !== 'Paid') { %>
+                                        <button type="button" class="btn btn-sm btn-outline-success" data-id="<%= inv._id %>" data-num="<%= inv.invoiceNumber %>" data-bal="<%= inv.balanceDue %>" onclick="openPaymentModalFromBtn(this)" title="Add Payment">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </button>
+                                    <% } %>
+                                    <form method="POST" action="/admin/invoice-system/invoices/delete/<%= inv._id %>" class="d-inline" onsubmit="return confirm('Delete this invoice?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-secondary opacity-50"></i>
+                            <div>No invoices found matching criteria</div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form id="paymentForm" onsubmit="submitPayment(event)">
+                <input type="hidden" name="invoiceId" id="payInvoiceId">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-dark" id="payModalTitle">Record Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label">Payment Amount (₹)</label>
+                        <input type="number" step="0.01" name="amount" id="payAmount" class="form-control form-control-lg fw-bold text-success" required>
+                        <small class="text-muted">Balance Due: ₹<span id="payBalanceDue">0</span></small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select name="paymentMethod" class="form-select">
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Wallet">Wallet</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Transaction Ref / Cheque #</label>
+                        <input type="text" name="transactionRef" class="form-control" placeholder="UPI Ref / Txn ID">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Date</label>
+                        <input type="date" name="paymentDate" class="form-control" value="<%= new Date().toISOString().split('T')[0] %>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4"><i class="fas fa-check me-1"></i>Save Payment & Receipt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openPaymentModalFromBtn(btn) {
+    openPaymentModal(btn.dataset.id, btn.dataset.num, parseFloat(btn.dataset.bal || 0));
+}
+
+function openPaymentModal(id, invNum, bal) {
+    document.getElementById('payInvoiceId').value = id;
+    document.getElementById('payModalTitle').innerText = 'Record Payment - ' + invNum;
+    document.getElementById('payAmount').value = bal;
+    document.getElementById('payBalanceDue').innerText = bal.toLocaleString('en-IN');
+    var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    modal.show();
+}
+
+async function submitPayment(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const body = Object.fromEntries(formData.entries());
+    const res = await fetch('/admin/invoice-system/invoices/add-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success) {
+        alert(data.message + ' (Receipt: ' + data.receiptNumber + ')');
+        location.reload();
+    } else {
+        alert('Error: ' + data.message);
+    }
+}
+</script>
