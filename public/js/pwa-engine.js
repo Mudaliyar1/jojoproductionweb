@@ -7,8 +7,9 @@ let deferredInstallPrompt = null;
 let db = null;
 let ws = null;
 
-document.addEventListener('DOMContentLoaded', async function() {
-    await initIndexedDB();
+document.addEventListener('DOMContentLoaded', function() {
+    // Non-blocking async background tasks
+    initIndexedDB();
     initServiceWorker();
     initNetworkMonitor();
     initWebSocketSync();

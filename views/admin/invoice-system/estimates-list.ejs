@@ -78,8 +78,8 @@
                             <td class="text-end">
                                 <div class="btn-group">
                                     <a href="/admin/invoice-system/estimates/edit/<%= est._id %>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <a href="/admin/invoice-system/print/estimate/<%= est._id %>" target="_blank" class="btn btn-sm btn-outline-dark" title="Print Document"><i class="fas fa-print"></i></a>
-                                    <a href="/admin/invoice-system/print/estimate/<%= est._id %>?download=pdf" target="_blank" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
+                                    <a href="/admin/invoice-system/print/estimate/<%= est._id %>" target="_self" class="btn btn-sm btn-outline-dark" title="Print Document"><i class="fas fa-print"></i></a>
+                                    <a href="/admin/invoice-system/print/estimate/<%= est._id %>?download=pdf" target="_self" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
                                     <% if (est.status !== 'Converted') { %>
                                         <form method="POST" action="/admin/invoice-system/estimates/convert/<%= est._id %>" class="d-inline" onsubmit="return confirm('Convert this estimate to an official invoice?')">
                                             <button type="submit" class="btn btn-sm btn-outline-success" title="Convert to Invoice"><i class="fas fa-exchange-alt"></i></button>

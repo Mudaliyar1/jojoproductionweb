@@ -39,26 +39,27 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch Event - Hybrid Caching Strategy
+// Fetch Event - Ultra-Fast Hybrid Caching Strategy
 self.addEventListener('fetch', event => {
     const req = event.request;
     const url = new URL(req.url);
 
-    // Skip non-GET requests (POST/PUT/DELETE handled by IndexedDB offline queue)
+    // Skip non-GET requests
     if (req.method !== 'GET') return;
 
-    // Static Assets & Fonts -> Cache First
-    if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.includes('/fonts/') || url.pathname.includes('/icons/')) {
+    // Static Assets (CSS, JS, CDNs, Fonts, Images) -> Cache First for instant rendering
+    if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.includes('/fonts/') || url.pathname.includes('/images/') || url.hostname.includes('cdn') || url.hostname.includes('cdnjs') || url.hostname.includes('fonts.googleapis.com')) {
         event.respondWith(
             caches.match(req).then(cachedRes => {
-                if (cachedRes) return cachedRes;
-                return fetch(req).then(networkRes => {
+                const fetchPromise = fetch(req).then(networkRes => {
                     if (networkRes.status === 200) {
                         const resClone = networkRes.clone();
                         caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
                     }
                     return networkRes;
-                });
+                }).catch(() => null);
+                
+                return cachedRes || fetchPromise;
             })
         );
         return;

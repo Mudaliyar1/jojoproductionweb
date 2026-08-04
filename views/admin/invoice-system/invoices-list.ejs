@@ -77,8 +77,8 @@
                             <td class="text-end">
                                 <div class="btn-group">
                                     <a href="/admin/invoice-system/invoices/edit/<%= inv._id %>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <a href="/admin/invoice-system/print/invoice/<%= inv._id %>" target="_blank" class="btn btn-sm btn-outline-dark" title="Print Document"><i class="fas fa-print"></i></a>
-                                    <a href="/admin/invoice-system/print/invoice/<%= inv._id %>?download=pdf" target="_blank" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
+                                    <a href="/admin/invoice-system/print/invoice/<%= inv._id %>" target="_self" class="btn btn-sm btn-outline-dark" title="Print Document"><i class="fas fa-print"></i></a>
+                                    <a href="/admin/invoice-system/print/invoice/<%= inv._id %>?download=pdf" target="_self" class="btn btn-sm btn-outline-danger" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
                                     <% if (inv.status !== 'Paid') { %>
                                         <button type="button" class="btn btn-sm btn-outline-success" data-id="<%= inv._id %>" data-num="<%= inv.invoiceNumber %>" data-bal="<%= inv.balanceDue %>" onclick="openPaymentModalFromBtn(this)" title="Add Payment">
                                             <i class="fas fa-money-bill-wave"></i>
