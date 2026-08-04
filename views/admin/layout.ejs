@@ -16,6 +16,15 @@
     
     <!-- Enterprise Admin CSS -->
     <link rel="stylesheet" href="/css/admin.css">
+
+    <!-- PWA Manifest & iOS Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jojo ERP">
+    <link rel="apple-touch-icon" href="/images/icons/icon-192.svg">
 </head>
 <body>
     <!-- Top Navigation Header -->
@@ -51,6 +60,16 @@
 
             <!-- Right Controls -->
             <div class="d-flex align-items-center gap-2">
+                <!-- PWA Network Indicator & Install Button -->
+                <span id="pwaNetworkStatusIndicator" class="badge bg-success-subtle text-success border border-success me-1">
+                    <i class="fas fa-wifi me-1"></i>Online
+                </span>
+                <span id="pwaOfflineBadge" class="badge bg-warning text-dark me-1 d-none" title="Pending Offline Queue">0 Pending</span>
+
+                <button id="pwaInstallBtn" type="button" onclick="triggerPwaInstall()" class="btn btn-sm btn-primary d-none me-1 shadow-sm" title="Install Jojo ERP App">
+                    <i class="fas fa-download me-1"></i>Install App
+                </button>
+
                 <!-- Search Bar Input -->
                 <div class="position-relative topbar-search-container">
                     <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
@@ -235,9 +254,10 @@
             const overlay = document.getElementById('sidebarBackdropOverlay');
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
-        }
-
         document.getElementById('sidebarToggleBtn').addEventListener('click', toggleSidebar);
     </script>
+
+    <!-- Enterprise PWA Engine Script -->
+    <script src="/js/pwa-engine.js"></script>
 </body>
 </html>

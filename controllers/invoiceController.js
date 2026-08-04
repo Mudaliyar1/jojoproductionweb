@@ -295,6 +295,16 @@ exports.saveEstimate = async (req, res) => {
             await logActivity(req, 'CREATE', 'Estimate', `Created Estimate ${estimate.estimateNumber}`, estimate._id, estimate.estimateNumber);
         }
 
+        if (req.app.locals.broadcastWebSocket) {
+            req.app.locals.broadcastWebSocket({
+                type: 'ESTIMATE_MUTATION',
+                action: payload.id ? 'UPDATE' : 'CREATE',
+                docType: 'estimate',
+                id: estimate._id,
+                number: estimate.estimateNumber
+            });
+        }
+
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, redirect: '/admin/invoice-system/estimates', id: estimate._id });
         }
@@ -561,6 +571,16 @@ exports.saveInvoice = async (req, res) => {
             settings.nextInvoiceNum += 1;
             await settings.save();
             await logActivity(req, 'CREATE', 'Invoice', `Created Invoice ${invoice.invoiceNumber}`, invoice._id, invoice.invoiceNumber);
+        }
+
+        if (req.app.locals.broadcastWebSocket) {
+            req.app.locals.broadcastWebSocket({
+                type: 'INVOICE_MUTATION',
+                action: payload.id ? 'UPDATE' : 'CREATE',
+                docType: 'invoice',
+                id: invoice._id,
+                number: invoice.invoiceNumber
+            });
         }
 
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
