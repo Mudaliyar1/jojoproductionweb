@@ -267,11 +267,8 @@ function showPwaToast(message, type = 'info') {
 }
 
 // ----------------------------------------------------
-// ----------------------------------------------------
 // 5. Official Native PWA Installation Engine (beforeinstallprompt)
 // ----------------------------------------------------
-let deferredInstallPrompt = null;
-
 function initInstallPrompt() {
     // Check if app is already running in Native Standalone PWA Window Mode
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
