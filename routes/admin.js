@@ -11,6 +11,7 @@ const Inquiry = require('../models/Inquiry');
 const About = require('../models/About');
 const bcrypt = require('bcrypt');
 const methodOverride = require('method-override');
+const invoiceController = require('../controllers/invoiceController');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -806,3 +807,8 @@ router.delete('/users/:id', isAdmin, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
+// Base64 logo upload for offline PWA sync
+router.post('/invoice-system/upload-logo-base64', isAdmin, invoiceController.uploadBase64Logo);
+
+module.exports = router;

@@ -348,8 +348,24 @@ async function saveDocument(e) {
 
     body.items = JSON.stringify(items);
     body.calcMode = calcMode;
-
     const actionUrl = form.getAttribute('action');
+
+    // Check if offline before attempting network fetch
+    if (!navigator.onLine) {
+        if (typeof queueOfflineAction === 'function') {
+            await queueOfflineAction(actionUrl, 'POST', body, actionUrl.includes('estimate') ? 'estimate' : 'invoice');
+            if (typeof showPwaToast === 'function') {
+                showPwaToast('Document saved locally in offline queue! Will sync automatically when online.', 'success');
+            } else {
+                alert('Document saved locally in offline queue!');
+            }
+            setTimeout(() => {
+                window.location.href = actionUrl.includes('estimate') ? '/admin/invoice-system/estimates' : '/admin/invoice-system/invoices';
+            }, 1000);
+            return;
+        }
+    }
+
     try {
         const res = await fetch(actionUrl, {
             method: 'POST',
@@ -361,12 +377,22 @@ async function saveDocument(e) {
         });
         const result = await res.json();
         if (result.success) {
-            alert('Saved successfully!');
             window.location.href = result.redirect;
         } else {
             alert('Save failed: ' + result.message);
         }
     } catch (err) {
-        alert('Network error while saving: ' + err.message);
+        // Fallback to IndexedDB queue if fetch fails due to network drop
+        if (typeof queueOfflineAction === 'function') {
+            await queueOfflineAction(actionUrl, 'POST', body, actionUrl.includes('estimate') ? 'estimate' : 'invoice');
+            if (typeof showPwaToast === 'function') {
+                showPwaToast('Document saved locally in offline queue! Will sync automatically when online.', 'success');
+            }
+            setTimeout(() => {
+                window.location.href = actionUrl.includes('estimate') ? '/admin/invoice-system/estimates' : '/admin/invoice-system/invoices';
+            }, 1000);
+        } else {
+            alert('Network error: ' + err.message);
+        }
     }
 }

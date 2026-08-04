@@ -1050,3 +1050,23 @@ exports.getPrintView = async (req, res) => {
         res.status(500).send('Error rendering print view');
     }
 };
+
+// ====================================================
+// OFFLINE MEDIA BASE64 UPLOAD ENDPOINT
+// ====================================================
+exports.uploadBase64Logo = async (req, res) => {
+    try {
+        const { base64Image } = req.body;
+        if (!base64Image) return res.status(400).json({ success: false, message: 'No image provided' });
+
+        const uploadRes = await cloudinary.uploader.upload(base64Image, {
+            folder: 'jojo_logos',
+            resource_type: 'image'
+        });
+
+        res.json({ success: true, url: uploadRes.secure_url });
+    } catch (error) {
+        console.error('Error in uploadBase64Logo:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
