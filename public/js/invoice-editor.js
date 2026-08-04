@@ -7,7 +7,12 @@ let copiedRowData = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     initEditorEvents();
-    recalculateTotals();
+    const gstSelect = document.getElementById('inputGstEnabled');
+    if (gstSelect) {
+        onGstToggleChange(gstSelect);
+    } else {
+        recalculateTotals();
+    }
 });
 
 function initEditorEvents() {
@@ -81,6 +86,16 @@ function addServiceRow(trTarget = null, position = 'below') {
     const templateRow = document.getElementById('rowTemplate');
     const clone = templateRow.content.cloneNode(true);
     const newTr = clone.querySelector('tr');
+
+    const gstSelect = document.getElementById('inputGstEnabled');
+    if (gstSelect && gstSelect.value === 'false') {
+        const gstInput = newTr.querySelector('.item-gst');
+        if (gstInput) {
+            gstInput.value = '0';
+            gstInput.disabled = true;
+            gstInput.classList.add('bg-danger-subtle', 'text-danger', 'fw-bold');
+        }
+    }
 
     if (trTarget) {
         if (position === 'above') {
@@ -163,6 +178,9 @@ function recalculateTotals() {
     let totalGst = 0;
     let hasRange = false;
 
+    const inputGstEnabled = document.getElementById('inputGstEnabled');
+    const isGstActive = inputGstEnabled ? (inputGstEnabled.value === 'true') : true;
+
     const rows = document.querySelectorAll('#editorItemsBody tr');
     rows.forEach(tr => {
         const qty = parseFloat(tr.querySelector('.item-qty')?.value || 0);
@@ -176,7 +194,7 @@ function recalculateTotals() {
 
         if (priceType === 'range' && maxRate > 0) hasRange = true;
 
-        const rowGst = (rowMinAmt * gstPercent) / 100;
+        const rowGst = isGstActive ? ((rowMinAmt * gstPercent) / 100) : 0;
         totalGst += rowGst;
 
         subtotalMin += rowMinAmt;
@@ -235,6 +253,49 @@ function recalculateTotals() {
             dispGrandTotal.innerText = '';
         }
     }
+}
+
+// Toggle GST Mode (Enable vs Disable Dropdown)
+function onGstToggleChange(selectElem) {
+    const isEnabled = selectElem.value === 'true';
+    const gstRow = document.getElementById('rowGstTax');
+    const taxIcon = document.getElementById('taxModeIcon');
+
+    if (isEnabled) {
+        selectElem.className = 'form-select form-select-sm fw-bold text-success border-success';
+        if (taxIcon) taxIcon.className = 'fas fa-percent me-1 text-success';
+        if (gstRow) gstRow.classList.remove('d-none');
+    } else {
+        selectElem.className = 'form-select form-select-sm fw-bold text-danger border-danger';
+        if (taxIcon) taxIcon.className = 'fas fa-ban me-1 text-danger';
+        if (gstRow) gstRow.classList.add('d-none');
+    }
+
+    // Toggle GST % inputs in table
+    const rows = document.querySelectorAll('#editorItemsBody tr');
+    rows.forEach(tr => {
+        const gstInput = tr.querySelector('.item-gst');
+        if (gstInput) {
+            if (!isEnabled) {
+                if (gstInput.value && gstInput.value !== '0') {
+                    gstInput.dataset.prevGst = gstInput.value;
+                }
+                gstInput.value = '0';
+                gstInput.disabled = true;
+                gstInput.classList.add('bg-danger-subtle', 'text-danger', 'fw-bold');
+            } else {
+                gstInput.disabled = false;
+                gstInput.classList.remove('bg-danger-subtle', 'text-danger', 'fw-bold');
+                if (gstInput.value === '0' && gstInput.dataset.prevGst) {
+                    gstInput.value = gstInput.dataset.prevGst;
+                } else if (gstInput.value === '0') {
+                    gstInput.value = '18';
+                }
+            }
+        }
+    });
+
+    recalculateTotals();
 }
 
 // Toggle Auto vs Manual Calculation Mode

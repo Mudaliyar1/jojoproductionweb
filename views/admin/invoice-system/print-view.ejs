@@ -131,7 +131,9 @@
                     <th style="width: 40%;">Description / Service</th>
                     <th style="width: 10%;" class="text-center">Qty</th>
                     <th style="width: 15%;" class="text-end">Rate (₹)</th>
-                    <th style="width: 10%;" class="text-center">GST %</th>
+                    <% if (doc.gstEnabled !== false) { %>
+                        <th style="width: 10%;" class="text-center">GST %</th>
+                    <% } %>
                     <th style="width: 20%;" class="text-end">Amount (₹)</th>
                 </tr>
             </thead>
@@ -149,7 +151,9 @@
                                     ₹<%= item.rate.toLocaleString('en-IN') %>
                                 <% } %>
                             </td>
-                            <td class="text-center"><%= item.gstPercent %>%</td>
+                            <% if (doc.gstEnabled !== false) { %>
+                                <td class="text-center"><%= item.gstPercent %>%</td>
+                            <% } %>
                             <td class="text-end fw-bold">
                                 <% if (item.priceType === 'range') { %>
                                     ₹<%= item.amount.toLocaleString('en-IN') %> - ₹<%= item.maxAmount.toLocaleString('en-IN') %>
@@ -189,7 +193,7 @@
                             <td class="text-danger">-₹<%= doc.discountTotal.toLocaleString('en-IN') %></td>
                         </tr>
                     <% } %>
-                    <% if (doc.gstTotal > 0) { %>
+                    <% if (doc.gstEnabled !== false && doc.gstTotal > 0) { %>
                         <tr>
                             <td class="text-muted">GST Total:</td>
                             <td class="fw-semibold">₹<%= doc.gstTotal.toLocaleString('en-IN') %></td>

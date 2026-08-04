@@ -41,6 +41,7 @@ const invoiceSchema = new mongoose.Schema({
     },
     items: [invoiceItemSchema],
     calcMode: { type: String, enum: ['auto', 'manual'], default: 'auto' },
+    gstEnabled: { type: Boolean, default: true },
     subtotal: { type: Number, default: 0 },
     minTotal: { type: Number, default: 0 },
     maxTotal: { type: Number, default: 0 },

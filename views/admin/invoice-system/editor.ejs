@@ -15,6 +15,15 @@
             </div>
 
             <div class="d-flex flex-wrap align-items-center gap-2">
+                <!-- High Visibility GST Mode Select Dropdown -->
+                <div class="input-group input-group-sm w-auto">
+                    <span class="input-group-text bg-light text-dark fw-bold"><i id="taxModeIcon" class="fas <%= (doc && doc.gstEnabled === false) ? 'fa-ban text-danger' : 'fa-percent text-success' %> me-1"></i>Tax Mode</span>
+                    <select name="gstEnabled" id="inputGstEnabled" class="form-select form-select-sm fw-bold <%= (doc && doc.gstEnabled === false) ? 'text-danger border-danger' : 'text-success border-success' %>" onchange="onGstToggleChange(this)">
+                        <option value="true" <%= (doc && doc.gstEnabled === false) ? '' : 'selected' %>>✅ GST Enabled (18%)</option>
+                        <option value="false" <%= (doc && doc.gstEnabled === false) ? 'selected' : '' %>>🚫 GST Disabled (0% Non-GST)</option>
+                    </select>
+                </div>
+
                 <!-- Auto vs Manual Calculation Mode -->
                 <button type="button" id="btnCalcMode" class="btn btn-outline-success btn-sm" onclick="toggleCalcMode()">
                     <i class="fas fa-magic me-1"></i>Auto Calculation Mode
@@ -357,7 +366,7 @@
                                     <input type="number" step="0.01" name="discountTotal" id="inputDiscount" class="form-control form-control-sm text-end text-danger" value="<%= doc ? doc.discountTotal : 0 %>" oninput="recalculateTotals()">
                                 </td>
                             </tr>
-                            <tr>
+                            <tr id="rowGstTax" class="<%= (doc && doc.gstEnabled === false) ? 'd-none' : '' %>">
                                 <td class="fw-semibold text-muted">GST Tax Total:</td>
                                 <td>
                                     <input type="number" step="0.01" name="gstTotal" id="inputGstTotal" class="form-control form-control-sm text-end" value="<%= doc ? doc.gstTotal : 0 %>" readonly>
