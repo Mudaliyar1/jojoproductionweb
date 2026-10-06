@@ -155,7 +155,7 @@
 
                             <td class="pe-4 text-end">
                                 <div class="btn-group">
-                                    <button onclick='viewTicketDetails(<%- JSON.stringify(t) %>)' class="btn btn-sm btn-outline-info rounded-3" title="View Full Details">
+                                    <button data-ticket="<%= encodeURIComponent(JSON.stringify(t)) %>" onclick="viewTicketFromData(this)" class="btn btn-sm btn-outline-info rounded-3" title="View Full Details">
                                         <i class="fas fa-eye me-1"></i> Details
                                     </button>
 
@@ -313,6 +313,17 @@
             }
         } catch (err) {
             alert('Failed to cancel ticket.');
+        }
+    }
+
+    function viewTicketFromData(btn) {
+        const rawData = btn.getAttribute('data-ticket');
+        if (!rawData) return;
+        try {
+            const t = JSON.parse(decodeURIComponent(rawData));
+            viewTicketDetails(t);
+        } catch(e) {
+            console.error('Error parsing ticket data:', e);
         }
     }
 
