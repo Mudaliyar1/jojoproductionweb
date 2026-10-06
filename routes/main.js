@@ -206,26 +206,17 @@ router.post('/inquiry', isAuthenticated, async (req, res) => {
     }
 });
 
-// Service detail page
-router.get('/services/:id', async (req, res) => {
-    try {
-        const service = await Service.findById(req.params.id);
-        if (!service) {
-            req.flash('error_msg', 'Service not found.');
-            return res.redirect('/services');
-        }
-        console.log('Service images:', service.images);
-        console.log('Service videos:', service.videos);
-        res.render('service-details', {
-            title: service.title + ' - Jojo\'s Production',
-            service,
-            active: 'services'
-        });
-    } catch (error) {
-        console.error('Error loading service details:', error);
-        req.flash('error_msg', 'Error loading service details.');
-        res.redirect('/services');
-    }
-});
+// Public Event Ticket Booking & Bodyguard Scanner Routes
+const eventController = require('../controllers/eventController');
+
+router.get('/events/:eventSlug/book', eventController.getPublicBookingPage);
+router.get('/ticket/:eventSlug', eventController.getPublicBookingPage);
+router.post('/events/:eventSlug/book', eventController.processPublicBooking);
+router.get('/ticket/view/:bookingToken', eventController.getPublicTicketView);
+
+// Public Bodyguard Scanner Routes (No login required)
+router.get('/scan/event/:token', eventController.getPublicScannerPage);
+router.post('/scan/event/:token/validate', eventController.validatePublicScannerScan);
+router.post('/scan/event/:token/sync-offline', eventController.syncPublicScannerOffline);
 
 module.exports = router;

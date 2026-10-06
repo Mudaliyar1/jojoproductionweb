@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tickets - <%= event.name %></title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Event Design System CSS -->
+    <link rel="stylesheet" href="/css/event-design-system.css">
+
+    <style>
+        .event-banner-img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: var(--ds-radius-lg);
+            border: 1px solid var(--ds-border);
+        }
+
+        .meta-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: var(--ds-surface-subtle);
+            color: var(--ds-text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .mobile-sticky-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border-top: 1px solid var(--ds-border);
+            padding: 12px 16px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+            z-index: 1000;
+        }
+
+        @media (min-width: 992px) {
+            .mobile-sticky-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ds-container">
+        
+        <!-- Public Brand Subtitle Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <div class="d-flex align-items-center gap-2 text-dark font-weight-bold">
+                <i class="fas fa-ticket-alt fs-5"></i>
+                <span class="fw-bold tracking-tight text-uppercase fs-7 text-muted">Official Event Booking</span>
+            </div>
+            <div>
+                <% if (event.ticketPrice === 0) { %>
+                    <span class="ds-badge ds-badge-success"><i class="fas fa-check-circle"></i> FREE ENTRY</span>
+                <% } else { %>
+                    <span class="ds-badge ds-badge-neutral"><i class="fas fa-tag"></i> ₹<%= event.ticketPrice %> / Ticket</span>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Event Information -->
+            <div class="col-lg-6">
+                <!-- Event Banner Image if available -->
+                <% if (event.bannerImage) { %>
+                    <img src="<%= event.bannerImage %>" alt="<%= event.name %>" class="event-banner-img mb-3">
+                <% } %>
+
+                <h1 class="ds-title-hero mb-3"><%= event.name %></h1>
+
+                <!-- Event Details Grid -->
+                <div class="ds-card-flat mb-3">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="meta-icon-box"><i class="far fa-calendar-alt"></i></div>
+                        <div>
+                            <div class="ds-text-sm">Date</div>
+                            <div class="fw-bold text-dark"><%= new Date(event.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="meta-icon-box"><i class="far fa-clock"></i></div>
+                        <div>
+                            <div class="ds-text-sm">Time</div>
+                            <div class="fw-bold text-dark"><%= event.eventTime %></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="meta-icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <div class="ds-text-sm">Venue</div>
+                            <div class="fw-bold text-dark"><%= event.venue %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket Availability Status Card -->
+                <div class="ds-card-flat mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="ds-text-sm">Tickets Remaining</div>
+                            <div class="fw-extrabold fs-4 text-dark mt-1">
+                                <%= event.remainingTickets.toLocaleString() %> <small class="fs-7 text-muted fw-normal">/ <%= event.totalTickets.toLocaleString() %></small>
+                            </div>
+                        </div>
+                        <div>
+                            <% if (event.bookingStatus === 'SOLD_OUT' || event.remainingTickets <= 0) { %>
+                                <span class="ds-badge ds-badge-danger">SOLD OUT</span>
+                            <% } else if (event.bookingStatus !== 'OPEN') { %>
+                                <span class="ds-badge ds-badge-warning">BOOKING <%= event.bookingStatus %></span>
+                            <% } else { %>
+                                <span class="ds-badge ds-badge-success">BOOKING OPEN</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (event.description) { %>
+                    <div class="ds-card-flat mb-3">
+                        <div class="ds-text-sm fw-bold mb-1">About the Event</div>
+                        <div class="ds-text-body"><%= event.description %></div>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Right Column: Clean Checkout Form -->
+            <div class="col-lg-6">
+                <div class="ds-card">
+                    <h2 class="ds-title-section mb-4">Select Tickets & Details</h2>
+
+                    <div id="alertContainer"></div>
+
+                    <% if (event.bookingStatus === 'OPEN' && event.remainingTickets > 0) { %>
+                        <form id="publicBookingForm">
+                            <!-- Quantity Selector -->
+                            <div class="ds-form-group">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="ds-label m-0">Number of Tickets</label>
+                                    <span class="ds-text-sm text-muted">Type or use − / +</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="ds-stepper">
+                                        <button type="button" class="ds-stepper-btn" id="btnMinus" onclick="updateQty(-1)">−</button>
+                                        <input type="number" id="ticketQty" name="quantity" class="ds-stepper-val" style="width: 80px;" value="<%= event.minTicketsPerBooking %>" min="<%= event.minTicketsPerBooking %>" max="<%= Math.min(event.maxTicketsPerBooking, event.remainingTickets) %>" oninput="handleDirectQtyInput(this)" onchange="handleDirectQtyInput(this)">
+                                        <button type="button" class="ds-stepper-btn" id="btnPlus" onclick="updateQty(1)">+</button>
+                                    </div>
+                                    <div class="ds-text-sm">
+                                        Max <%= event.maxTicketsPerBooking %> tickets per booking
+                                    </div>
+                                </div>
+                                <div id="qtyInputHint" class="ds-text-sm text-danger mt-1 d-none"></div>
+                            </div>
+
+                            <!-- Customer Info Inputs -->
+                            <div class="ds-form-group">
+                                <label for="customerName" class="ds-label">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="ds-input" id="customerName" name="customerName" placeholder="Enter your full name" required>
+                            </div>
+
+                            <div class="ds-form-group">
+                                <label for="customerMobile" class="ds-label">Mobile Number <span class="text-danger">*</span></label>
+                                <input type="tel" class="ds-input" id="customerMobile" name="customerMobile" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                            </div>
+
+                            <div class="ds-form-group">
+                                <label for="customerEmail" class="ds-label">Email Address <%= event.requireEmail ? '<span class="text-danger">*</span>' : '(Optional)' %></label>
+                                <input type="email" class="ds-input" id="customerEmail" name="customerEmail" placeholder="name@example.com" <%= event.requireEmail ? 'required' : '' %>>
+                            </div>
+
+                            <!-- Summary & Action Button -->
+                            <div class="p-3 bg-light rounded-3 mb-4 border">
+                                <div class="d-flex justify-content-between ds-text-body mb-2">
+                                    <span>Ticket Price</span>
+                                    <span class="fw-bold text-dark"><%= event.ticketPrice === 0 ? 'FREE' : '₹' + event.ticketPrice %></span>
+                                </div>
+                                <div class="d-flex justify-content-between ds-text-body mb-2">
+                                    <span>Quantity</span>
+                                    <span class="fw-bold text-dark" id="summaryQty"><%= event.minTicketsPerBooking %></span>
+                                </div>
+                                <div class="d-flex justify-content-between font-weight-bold fs-6 pt-2 border-top">
+                                    <span class="fw-bold text-dark">Total Amount</span>
+                                    <span class="fw-bold text-dark" id="summaryTotal"><%= event.ticketPrice === 0 ? 'FREE ENTRY' : '₹' + (event.ticketPrice * event.minTicketsPerBooking) %></span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="ds-btn ds-btn-primary w-100 py-3" id="submitBookingBtn">
+                                <span id="btnText"><%= event.ticketPrice === 0 ? 'Confirm Booking' : 'Book ' + event.minTicketsPerBooking + ' Tickets — ₹' + (event.ticketPrice * event.minTicketsPerBooking) %></span>
+                            </button>
+                        </form>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <div class="fs-1 text-muted mb-2"><i class="fas fa-lock"></i></div>
+                            <h4 class="fw-bold text-dark">Booking Unavailable</h4>
+                            <p class="ds-text-body mb-4">Tickets for this event are currently sold out or closed.</p>
+                            <button class="ds-btn ds-btn-secondary" disabled>SOLD OUT</button>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="text-center ds-text-sm mt-3">
+                    <i class="fas fa-lock me-1"></i> Instant Digital Pass Generation & Verified Entry
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const minQty = parseInt('<%= event.minTicketsPerBooking %>') || 1;
+        const maxQtyLimit = parseInt('<%= event.maxTicketsPerBooking %>') || 200;
+        let availableCapacity = parseInt('<%= event.remainingTickets %>') || 0;
+        const unitPrice = parseFloat('<%= event.ticketPrice %>') || 0;
+
+        function updateQty(change) {
+            const input = document.getElementById('ticketQty');
+            let currentVal = parseInt(input.value) || minQty;
+            input.value = currentVal + change;
+            handleDirectQtyInput(input);
+        }
+
+        function handleDirectQtyInput(input) {
+            let val = parseInt(input.value);
+            const hint = document.getElementById('qtyInputHint');
+            const maxAllowed = Math.min(maxQtyLimit, availableCapacity);
+
+            if (isNaN(val) || val < minQty) {
+                if (hint) {
+                    hint.textContent = `Minimum ${minQty} ticket required per booking.`;
+                    hint.classList.remove('d-none');
+                }
+                document.getElementById('summaryQty').textContent = input.value || minQty;
+                return;
+            }
+
+            if (val > maxAllowed) {
+                val = maxAllowed;
+                input.value = maxAllowed;
+                if (hint) {
+                    hint.textContent = `Maximum limit is ${maxAllowed} tickets per booking.`;
+                    hint.classList.remove('d-none');
+                }
+            } else {
+                if (hint) hint.classList.add('d-none');
+            }
+
+            document.getElementById('summaryQty').textContent = val;
+            const btnText = document.getElementById('btnText');
+            if (unitPrice === 0) {
+                document.getElementById('summaryTotal').textContent = 'FREE ENTRY';
+                if (btnText) btnText.textContent = 'Confirm Booking';
+            } else {
+                const total = unitPrice * val;
+                document.getElementById('summaryTotal').textContent = '₹' + total.toLocaleString('en-IN');
+                if (btnText) btnText.textContent = `Book ${val} Tickets — ₹${total.toLocaleString('en-IN')}`;
+            }
+
+            document.getElementById('btnMinus').disabled = (val <= minQty);
+            document.getElementById('btnPlus').disabled = (val >= maxAllowed);
+        }
+
+        const form = document.getElementById('publicBookingForm');
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submitBookingBtn');
+                const alertContainer = document.getElementById('alertContainer');
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+                alertContainer.innerHTML = '';
+
+                const payload = {
+                    customerName: document.getElementById('customerName').value,
+                    customerMobile: document.getElementById('customerMobile').value,
+                    customerEmail: document.getElementById('customerEmail').value,
+                    quantity: document.getElementById('ticketQty').value
+                };
+
+                try {
+                    const response = await fetch('/events/<%= event.slug %>/book', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const resData = await response.json();
+
+                    if (resData.success) {
+                        alertContainer.innerHTML = `
+                            <div class="alert alert-success border-0 bg-success text-white mb-4 rounded-3">
+                                <i class="fas fa-check-circle me-2"></i> ${resData.message} Redirecting to your ticket...
+                            </div>
+                        `;
+                        setTimeout(() => {
+                            window.location.href = resData.redirectUrl;
+                        }, 1000);
+                    } else {
+                        alertContainer.innerHTML = `
+                            <div class="alert alert-danger border-0 bg-danger text-white mb-4 rounded-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i> ${resData.message}
+                            </div>
+                        `;
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Confirm Booking';
+                    }
+                } catch (err) {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger border-0 bg-danger text-white mb-4 rounded-3">
+                            <i class="fas fa-wifi me-2"></i> Network error. Please check connection and try again.
+                        </div>
+                    `;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Confirm Booking';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

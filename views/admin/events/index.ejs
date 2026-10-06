@@ -1,0 +1,225 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-dark m-0"><i class="fas fa-ticket-alt text-warning me-2"></i>Event Ticket Management</h3>
+        <p class="text-muted small m-0">Configure ticket capacity, common QR codes, and track real-time venue attendance.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/events/new" class="btn btn-primary fw-bold shadow-sm rounded-3">
+            <i class="fas fa-plus-circle me-1"></i> Create New Event
+        </a>
+    </div>
+</div>
+
+<!-- Overview Analytics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3 bg-primary-subtle text-primary fs-4">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <div class="text-muted fs-8 fw-semibold text-uppercase">Total Capacity</div>
+                    <div class="fw-extrabold fs-4 text-dark"><%= overview.totalCapacity.toLocaleString() %></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3 bg-info-subtle text-info fs-4">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div>
+                    <div class="text-muted fs-8 fw-semibold text-uppercase">Total Booked</div>
+                    <div class="fw-extrabold fs-4 text-dark"><%= overview.totalBooked.toLocaleString() %></div>
+                    <div class="fs-8 text-muted"><%= overview.totalRemaining.toLocaleString() %> Remaining</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3 bg-success-subtle text-success fs-4">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <div class="text-muted fs-8 fw-semibold text-uppercase">Checked In</div>
+                    <div class="fw-extrabold fs-4 text-dark"><%= overview.totalCheckedIn.toLocaleString() %></div>
+                    <div class="fs-8 text-muted"><%= overview.totalNotCheckedIn.toLocaleString() %> Pending</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3 bg-warning-subtle text-warning fs-4">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div>
+                    <div class="text-muted fs-8 fw-semibold text-uppercase">Total Revenue</div>
+                    <div class="fw-extrabold fs-4 text-dark">₹<%= overview.totalRevenue.toLocaleString('en-IN') %></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Table -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-0">
+        <h5 class="fw-bold text-dark m-0">Active Events</h5>
+        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill"><%= events.length %> Events Configured</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-muted fs-8 text-uppercase fw-bold border-top">
+                <tr>
+                    <th class="ps-4">Event Details</th>
+                    <th>Date & Venue</th>
+                    <th>Price & Type</th>
+                    <th>Ticket Capacity</th>
+                    <th>Check-Ins</th>
+                    <th>Booking Status</th>
+                    <th class="pe-4 text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (events && events.length > 0) { %>
+                    <% events.forEach(function(e) { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-light p-2 text-center" style="width: 48px; height: 48px;">
+                                        <i class="fas fa-calendar-star text-primary fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <a href="/admin/events/<%= e._id %>/settings" class="fw-bold text-dark text-decoration-none hover-primary"><%= e.name %></a>
+                                        <div class="fs-8 text-muted">/events/<%= e.slug %>/book</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold text-dark"><%= new Date(e.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                                <div class="fs-8 text-muted"><i class="fas fa-map-marker-alt me-1"></i><%= e.venue %></div>
+                            </td>
+
+                            <td>
+                                <% if (e.ticketPrice === 0) { %>
+                                    <span class="badge bg-success-subtle text-success border border-success fw-bold">FREE ENTRY</span>
+                                <% } else { %>
+                                    <span class="fw-extrabold text-dark">₹<%= e.ticketPrice %></span>
+                                <% } %>
+                                <div class="fs-8 text-muted"><%= e.ticketType %></div>
+                            </td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold text-dark"><%= e.bookedTickets %></span>
+                                    <span class="text-muted fs-8">/ <%= e.totalTickets %></span>
+                                </div>
+                                <div class="progress rounded-pill" style="height: 6px;">
+                                    <% const bookPercent = Math.min(100, Math.round((e.bookedTickets / e.totalTickets) * 100)); %>
+                                    <div class="progress-bar <%= bookPercent >= 90 ? 'bg-danger' : 'bg-primary' %>" style="width: <%= bookPercent %>%;"></div>
+                                </div>
+                                <div class="fs-8 text-muted mt-1"><%= e.remainingTickets %> remaining</div>
+                            </td>
+
+                            <td>
+                                <div class="fw-bold text-dark"><%= e.checkedInTickets %></div>
+                                <div class="fs-8 text-muted"><%= e.bookedTickets - e.checkedInTickets %> pending</div>
+                            </td>
+
+                            <td>
+                                <% if (e.bookingStatus === 'OPEN') { %>
+                                    <span class="badge bg-success text-white px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i> OPEN</span>
+                                <% } else if (e.bookingStatus === 'SOLD_OUT') { %>
+                                    <span class="badge bg-danger text-white px-3 py-2 rounded-pill"><i class="fas fa-ban me-1"></i> SOLD OUT</span>
+                                <% } else { %>
+                                    <span class="badge bg-secondary text-white px-3 py-2 rounded-pill"><%= e.bookingStatus %></span>
+                                <% } %>
+                            </td>
+
+                            <td class="pe-4 text-end">
+                                <div class="btn-group">
+                                    <a href="/admin/events/<%= e._id %>/settings" class="btn btn-sm btn-outline-primary" title="Ticket Settings & QR">
+                                        <i class="fas fa-cog me-1"></i> Settings
+                                    </a>
+                                    <a href="/admin/events/<%= e._id %>/poster" target="_blank" class="btn btn-sm btn-outline-dark" title="Print Event Common QR Poster">
+                                        <i class="fas fa-qrcode me-1"></i> Poster QR
+                                    </a>
+                                    <button onclick="confirmDeleteEvent('<%= e._id %>', '<%= e.name %>')" class="btn btn-sm btn-outline-danger" title="Delete Event">
+                                        <i class="fas fa-trash me-1"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-ticket-alt text-muted fs-1 mb-3"></i>
+                            <h5 class="fw-bold text-dark">No Events Found</h5>
+                            <p class="text-muted small">Create your first event to configure ticket quantity and generate your common QR code.</p>
+                            <a href="/admin/events/new" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">Create Event</a>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <% if (typeof pagination !== 'undefined' && pagination && pagination.totalPages > 1) { %>
+        <div class="card-footer bg-white border-top py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <div class="text-muted fs-8">
+                Showing Page <strong><%= pagination.page %></strong> of <strong><%= pagination.totalPages %></strong> (<%= pagination.totalEventsCount %> Total Events)
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm m-0 gap-1">
+                    <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+                        <a class="page-link rounded-3" href="/admin/events?page=<%= pagination.page - 1 %>">Previous</a>
+                    </li>
+                    <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+                        <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
+                            <a class="page-link rounded-3" href="/admin/events?page=<%= p %>"><%= p %></a>
+                        </li>
+                    <% } %>
+                    <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
+                        <a class="page-link rounded-3" href="/admin/events?page=<%= pagination.page + 1 %>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    async function confirmDeleteEvent(eventId, eventName) {
+        if (!confirm(`Are you sure you want to delete "${eventName}"? All associated bookings, issued tickets, scanner links, and entry logs will be permanently deleted.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/events/${eventId}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (err) {
+            alert('Failed to delete event.');
+        }
+    }
+</script>

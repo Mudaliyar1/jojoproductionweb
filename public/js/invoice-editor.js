@@ -382,17 +382,6 @@ async function saveDocument(e) {
             alert('Save failed: ' + result.message);
         }
     } catch (err) {
-        // Fallback to IndexedDB queue if fetch fails due to network drop
-        if (typeof queueOfflineAction === 'function') {
-            await queueOfflineAction(actionUrl, 'POST', body, actionUrl.includes('estimate') ? 'estimate' : 'invoice');
-            if (typeof showPwaToast === 'function') {
-                showPwaToast('Document saved locally in offline queue! Will sync automatically when online.', 'success');
-            }
-            setTimeout(() => {
-                window.location.href = actionUrl.includes('estimate') ? '/admin/invoice-system/estimates' : '/admin/invoice-system/invoices';
-            }, 1000);
-        } else {
-            alert('Network error: ' + err.message);
-        }
+        alert('Network connection error: Unable to save document. Jojo ERP requires an active internet connection.');
     }
 }

@@ -1,0 +1,155 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-dark m-0"><i class="fas fa-sliders-h text-primary me-2"></i>Ticket Settings: <%= event.name %></h3>
+        <p class="text-muted small m-0">Manage capacity, price, status, and print your Common Event QR poster.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/admin/events/<%= event._id %>/scanners" class="btn btn-success rounded-3 fw-bold shadow-sm">
+            <i class="fas fa-qrcode me-1"></i> Scanner Links
+        </a>
+        <a href="/admin/events/<%= event._id %>/entry-logs" class="btn btn-outline-dark rounded-3 fw-bold">
+            <i class="fas fa-history me-1"></i> Entry Logs
+        </a>
+        <a href="/admin/events/<%= event._id %>/poster" target="_blank" class="btn btn-dark rounded-3 fw-bold shadow-sm">
+            <i class="fas fa-print me-1"></i> Poster QR
+        </a>
+        <a href="/admin/events" class="btn btn-outline-secondary rounded-3 fw-bold">
+            <i class="fas fa-arrow-left me-1"></i> Back to Events
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Common Event QR Code Showcase Card -->
+    <div class="col-lg-5 col-xl-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100 bg-white">
+            <div class="badge bg-primary-subtle text-primary border border-primary px-3 py-2 rounded-pill mb-3 align-self-center">
+                <i class="fas fa-qrcode me-1"></i> COMMON EVENT QR CODE
+            </div>
+            
+            <h5 class="fw-bold text-dark mb-1"><%= event.name %></h5>
+            <p class="text-muted fs-8 mb-3">Scan with mobile phone camera to open public booking page.</p>
+
+            <div class="p-3 rounded-4 bg-light d-inline-block border mb-3">
+                <img src="<%= qrCodeDataUri %>" alt="Common Event QR Code" class="img-fluid rounded-3" style="max-width: 240px;">
+            </div>
+
+            <div class="fw-extrabold text-success fs-5 mb-2">
+                <%= event.ticketPrice === 0 ? 'FREE ENTRY' : '₹' + event.ticketPrice + ' / Ticket' %>
+            </div>
+            <div class="fs-7 fw-bold text-dark mb-3">
+                <%= event.remainingTickets %> / <%= event.totalTickets %> Tickets Available
+            </div>
+
+            <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-sm" id="bookingUrlInput" value="<%= publicBookingUrl %>" readonly>
+                <button class="btn btn-outline-primary btn-sm fw-bold" onclick="copyBookingUrl()">
+                    <i class="fas fa-copy me-1"></i> Copy Link
+                </button>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a href="<%= publicBookingUrl %>" target="_blank" class="btn btn-outline-dark btn-sm rounded-3 fw-bold">
+                    <i class="fas fa-external-link-alt me-1"></i> Open Public Booking Page
+                </a>
+                <a href="<%= qrCodeDataUri %>" download="<%= event.slug %>-common-qr.png" class="btn btn-primary btn-sm rounded-3 fw-bold">
+                    <i class="fas fa-download me-1"></i> Download Common QR PNG
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Configuration & Capacity Form -->
+    <div class="col-lg-7 col-xl-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-cogs text-warning me-2"></i>Configure Capacity & Ticket Rules</h5>
+
+            <form action="/admin/events/<%= event._id %>/update" method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-bold">Event Name</label>
+                        <input type="text" class="form-control rounded-3" id="name" name="name" value="<%= event.name %>" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="venue" class="form-label fw-bold">Venue Location</label>
+                        <input type="text" class="form-control rounded-3" id="venue" name="venue" value="<%= event.venue %>" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="eventDate" class="form-label fw-bold">Event Date</label>
+                        <input type="date" class="form-control rounded-3" id="eventDate" name="eventDate" value="<%= new Date(event.eventDate).toISOString().split('T')[0] %>" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="eventTime" class="form-label fw-bold">Event Time</label>
+                        <input type="time" class="form-control rounded-3" id="eventTime" name="eventTime" value="<%= event.eventTime %>" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="totalTickets" class="form-label fw-bold text-danger">Total Ticket Capacity</label>
+                        <input type="number" class="form-control rounded-3" id="totalTickets" name="totalTickets" value="<%= event.totalTickets %>" min="<%= event.bookedTickets %>" required>
+                        <div class="form-text fs-8 text-muted">
+                            Currently booked: <strong class="text-dark"><%= event.bookedTickets %></strong>. Capacity cannot be set below booked tickets.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ticketPrice" class="form-label fw-bold">Ticket Price (₹)</label>
+                        <input type="number" class="form-control rounded-3" id="ticketPrice" name="ticketPrice" value="<%= event.ticketPrice %>" min="0" step="1" required>
+                        <div class="form-text fs-8">₹0 = FREE ENTRY on public booking page.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="minTicketsPerBooking" class="form-label fw-bold fs-7">Min Tickets / Booking</label>
+                        <input type="number" class="form-control rounded-3" id="minTicketsPerBooking" name="minTicketsPerBooking" value="<%= event.minTicketsPerBooking %>" min="1" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="maxTicketsPerBooking" class="form-label fw-bold fs-7">Max Tickets / Booking</label>
+                        <input type="number" class="form-control rounded-3" id="maxTicketsPerBooking" name="maxTicketsPerBooking" value="<%= event.maxTicketsPerBooking %>" min="1" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="bookingStatus" class="form-label fw-bold">Booking Status</label>
+                        <select class="form-select rounded-3" id="bookingStatus" name="bookingStatus">
+                            <option value="OPEN" <%= event.bookingStatus === 'OPEN' ? 'selected' : '' %>>OPEN (Accepting Bookings)</option>
+                            <option value="CLOSED" <%= event.bookingStatus === 'CLOSED' ? 'selected' : '' %>>CLOSED (Paused)</option>
+                            <option value="SOLD_OUT" <%= event.bookingStatus === 'SOLD_OUT' ? 'selected' : '' %>>SOLD OUT</option>
+                            <option value="CANCELLED" <%= event.bookingStatus === 'CANCELLED' ? 'selected' : '' %>>CANCELLED</option>
+                            <option value="COMPLETED" <%= event.bookingStatus === 'COMPLETED' ? 'selected' : '' %>>COMPLETED</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ticketMode" class="form-label fw-bold">Ticket QR Mode</label>
+                        <select class="form-select rounded-3" id="ticketMode" name="ticketMode">
+                            <option value="INDIVIDUAL_QR" <%= event.ticketMode === 'INDIVIDUAL_QR' ? 'selected' : '' %>>INDIVIDUAL_QR (Separate Pass per Person)</option>
+                            <option value="SINGLE_GROUP_QR" <%= event.ticketMode === 'SINGLE_GROUP_QR' ? 'selected' : '' %>>SINGLE_GROUP_QR (1 Pass for Group)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="bannerImage" class="form-label fw-bold">Update Event Banner</label>
+                        <input type="file" class="form-control rounded-3" id="bannerImage" name="bannerImage" accept="image/*">
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary rounded-3 fw-bold px-4 py-2">
+                            <i class="fas fa-save me-1"></i> Save Ticket Settings
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyBookingUrl() {
+        const input = document.getElementById('bookingUrlInput');
+        input.select();
+        document.execCommand('copy');
+        alert('Public Booking URL copied to clipboard!');
+    }
+</script>

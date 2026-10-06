@@ -12,6 +12,7 @@ const About = require('../models/About');
 const bcrypt = require('bcrypt');
 const methodOverride = require('method-override');
 const invoiceController = require('../controllers/invoiceController');
+const eventController = require('../controllers/eventController');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -44,6 +45,9 @@ router.use((req, res, next) => {
     else if (p.startsWith('/services')) res.locals.active = 'services';
     else if (p.startsWith('/about')) res.locals.active = 'about';
     else if (p.startsWith('/team')) res.locals.active = 'team';
+    else if (p.startsWith('/events')) res.locals.active = 'events';
+    else if (p.startsWith('/tickets')) res.locals.active = 'tickets';
+    else if (p.startsWith('/scanner')) res.locals.active = 'scanner';
 
     next();
 });
@@ -810,5 +814,40 @@ router.delete('/users/:id', isAdmin, async (req, res) => {
 
 // Base64 logo upload for offline PWA sync
 router.post('/invoice-system/upload-logo-base64', isAdmin, invoiceController.uploadBase64Logo);
+
+// ==========================================
+// ADMIN EVENT TICKET SYSTEM & SCANNER ROUTES
+// ==========================================
+
+// Event Management
+router.get('/events', isAdmin, eventController.getAdminEventsList);
+router.get('/events/new', isAdmin, eventController.getCreateEventForm);
+router.post('/events/create', isAdmin, upload.single('bannerImage'), eventController.createEvent);
+router.get('/events/:id/settings', isAdmin, eventController.getEventSettings);
+router.post('/events/:id/update', isAdmin, upload.single('bannerImage'), eventController.updateEventSettings);
+router.get('/events/:id/poster', isAdmin, eventController.getEventPoster);
+router.post('/events/:id/delete', isAdmin, eventController.deleteEvent);
+router.delete('/events/:id', isAdmin, eventController.deleteEvent);
+
+// Ticket Management
+router.get('/tickets', isAdmin, eventController.getAdminTicketsList);
+router.post('/tickets/:id/cancel', isAdmin, eventController.cancelTicket);
+router.post('/tickets/:id/delete', isAdmin, eventController.deleteTicket);
+router.delete('/tickets/:id', isAdmin, eventController.deleteTicket);
+router.post('/tickets/bulk-delete', isAdmin, eventController.bulkDeleteTickets);
+
+// Staff Ticket Scanner
+router.get('/scanner', isAdmin, eventController.getScannerPage);
+router.post('/scanner/validate', isAdmin, eventController.validateTicketScan);
+router.post('/scanner/sync-offline', isAdmin, eventController.syncOfflineEntries);
+
+// Scanner Link Management per Event
+router.get('/events/:id/scanners', isAdmin, eventController.getAdminScannerLinks);
+router.post('/events/:id/scanners/create', isAdmin, eventController.createScannerLink);
+router.post('/scanners/:scannerId/toggle', isAdmin, eventController.toggleScannerLink);
+router.post('/scanners/:scannerId/regenerate', isAdmin, eventController.regenerateScannerToken);
+router.delete('/scanners/:scannerId', isAdmin, eventController.deleteScannerLink);
+router.get('/scanners/:scannerId/poster', isAdmin, eventController.getScannerPoster);
+router.get('/events/:id/entry-logs', isAdmin, eventController.getAdminEntryLogs);
 
 module.exports = router;

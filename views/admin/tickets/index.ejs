@@ -1,0 +1,372 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-dark m-0"><i class="fas fa-id-card text-info me-2"></i>Ticket Registry & Attendance</h3>
+        <p class="text-muted small m-0">Search, filter, inspect details, delete tickets, and manage real-time check-in logs.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button id="btnBulkDelete" onclick="bulkDeleteSelectedTickets()" class="btn btn-danger fw-bold shadow-sm rounded-3 d-none">
+            <i class="fas fa-trash-alt me-1"></i> Delete Selected (<span id="selectedTicketCount">0</span>)
+        </button>
+        <a href="/admin/scanner" class="btn btn-success fw-bold shadow-sm rounded-3">
+            <i class="fas fa-qrcode me-1"></i> Open QR Scanner
+        </a>
+    </div>
+</div>
+
+<!-- Attendance Statistics Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+            <div class="text-muted fs-8 fw-semibold text-uppercase">Total Issued Tickets</div>
+            <div class="fw-extrabold fs-4 text-dark mt-1"><%= stats.totalTicketsCount.toLocaleString() %></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+            <div class="text-muted fs-8 fw-semibold text-uppercase">Checked In</div>
+            <div class="fw-extrabold fs-4 text-success mt-1"><%= stats.checkedInCount.toLocaleString() %></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+            <div class="text-muted fs-8 fw-semibold text-uppercase">Pending Entry</div>
+            <div class="fw-extrabold fs-4 text-warning mt-1"><%= stats.pendingCount.toLocaleString() %></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+            <div class="text-muted fs-8 fw-semibold text-uppercase">Cancelled Passes</div>
+            <div class="fw-extrabold fs-4 text-danger mt-1"><%= stats.cancelledCount.toLocaleString() %></div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter Controls Card -->
+<div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+    <form action="/admin/tickets" method="GET" class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <div class="position-relative">
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" name="search" class="form-control ps-5 rounded-3" placeholder="Search ticket #, booking ID, name, mobile, email..." value="<%= searchQuery %>">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <select name="eventId" class="form-select rounded-3">
+                <option value="">All Events</option>
+                <% events.forEach(function(e) { %>
+                    <option value="<%= e._id %>" <%= selectedEvent === e._id.toString() ? 'selected' : '' %>><%= e.name %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="entryStatus" class="form-select rounded-3">
+                <option value="">All Entry Status</option>
+                <option value="CHECKED_IN" <%= selectedEntryStatus === 'CHECKED_IN' ? 'selected' : '' %>>CHECKED IN</option>
+                <option value="PENDING" <%= selectedEntryStatus === 'PENDING' ? 'selected' : '' %>>PENDING</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="status" class="form-select rounded-3">
+                <option value="">All Pass Status</option>
+                <option value="VALID" <%= selectedStatus === 'VALID' ? 'selected' : '' %>>VALID</option>
+                <option value="CANCELLED" <%= selectedStatus === 'CANCELLED' ? 'selected' : '' %>>CANCELLED</option>
+            </select>
+        </div>
+
+        <div class="col-md-1 d-flex gap-1">
+            <button type="submit" class="btn btn-primary w-100 rounded-3"><i class="fas fa-filter"></i></button>
+            <a href="/admin/tickets" class="btn btn-outline-secondary rounded-3" title="Clear Filters"><i class="fas fa-undo"></i></a>
+        </div>
+    </form>
+</div>
+
+<!-- Tickets List Table -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-muted fs-8 text-uppercase fw-bold">
+                <tr>
+                    <th class="ps-3" style="width: 40px;">
+                        <input type="checkbox" id="selectAllTickets" class="form-check-input" onclick="toggleSelectAllTickets(this)">
+                    </th>
+                    <th>Ticket Number</th>
+                    <th>Customer Details</th>
+                    <th>Event Details</th>
+                    <th>Booking ID</th>
+                    <th>Pass Status</th>
+                    <th>Entry Check-In</th>
+                    <th class="pe-4 text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (tickets && tickets.length > 0) { %>
+                    <% tickets.forEach(function(t) { %>
+                        <tr>
+                            <td class="ps-3">
+                                <input type="checkbox" class="form-check-input ticket-select-chk" value="<%= t._id %>" onclick="updateBulkDeleteState()">
+                            </td>
+
+                            <td class="fw-extrabold text-dark font-mono">
+                                <i class="fas fa-ticket-alt text-primary me-1"></i><%= t.ticketNumber %>
+                            </td>
+
+                            <td>
+                                <div class="fw-bold text-dark"><%= t.customerName %></div>
+                                <div class="fs-8 text-muted"><i class="fas fa-phone-alt me-1"></i><%= t.customerMobile %> <%= t.customerEmail ? '| ' + t.customerEmail : '' %></div>
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold text-dark"><%= t.event ? t.event.name : 'Unknown Event' %></div>
+                                <div class="fs-8 text-muted"><%= t.event ? t.event.venue : '' %></div>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-light text-dark border font-mono"><%= t.booking ? t.booking.bookingId : 'N/A' %></span>
+                                <% if (t.booking && t.booking.quantity) { %>
+                                    <div class="fs-8 text-muted mt-1"><%= t.booking.quantity %> Ticket(s)</div>
+                                <% } %>
+                            </td>
+
+                            <td>
+                                <% if (t.ticketStatus === 'VALID' || t.ticketStatus === 'CHECKED_IN') { %>
+                                    <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill">VALID</span>
+                                <% } else if (t.ticketStatus === 'CANCELLED') { %>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-1 rounded-pill">CANCELLED</span>
+                                <% } else { %>
+                                    <span class="badge bg-info-subtle text-info border border-info px-3 py-1 rounded-pill"><%= t.ticketStatus %></span>
+                                <% } %>
+                            </td>
+
+                            <td>
+                                <% if (t.entryStatus === 'CHECKED_IN') { %>
+                                    <div class="text-success fw-bold fs-7">
+                                        <i class="fas fa-check-circle me-1"></i> CHECKED IN
+                                    </div>
+                                    <div class="fs-8 text-muted">
+                                        <%= t.checkedInAt ? new Date(t.checkedInAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '' %> (<%= t.checkedInGate || 'Main Gate' %>)
+                                    </div>
+                                <% } else { %>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-1 rounded-pill">PENDING ENTRY</span>
+                                <% } %>
+                            </td>
+
+                            <td class="pe-4 text-end">
+                                <div class="btn-group">
+                                    <button onclick='viewTicketDetails(<%- JSON.stringify(t) %>)' class="btn btn-sm btn-outline-info rounded-3" title="View Full Details">
+                                        <i class="fas fa-eye me-1"></i> Details
+                                    </button>
+
+                                    <% if (t.ticketStatus !== 'CANCELLED') { %>
+                                        <button onclick="cancelTicket('<%= t._id %>')" class="btn btn-sm btn-outline-warning rounded-3" title="Cancel Pass">
+                                            <i class="fas fa-ban me-1"></i> Cancel
+                                        </button>
+                                    <% } %>
+
+                                    <button onclick="deleteSingleTicket('<%= t._id %>', '<%= t.ticketNumber %>')" class="btn btn-sm btn-outline-danger rounded-3" title="Delete Ticket">
+                                        <i class="fas fa-trash me-1"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="fas fa-search fs-1 mb-3 text-muted"></i>
+                            <h6 class="fw-bold">No tickets match your search criteria</h6>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <% if (typeof pagination !== 'undefined' && pagination && pagination.totalPages > 1) { %>
+        <div class="card-footer bg-white border-top py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <div class="text-muted fs-8">
+                Showing Page <strong><%= pagination.page %></strong> of <strong><%= pagination.totalPages %></strong> (<%= pagination.totalMatchingTickets %> Total Matching Tickets)
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm m-0 gap-1">
+                    <% const buildUrl = (p) => `/admin/tickets?page=${p}&search=${encodeURIComponent(searchQuery)}&eventId=${selectedEvent}&entryStatus=${selectedEntryStatus}&status=${selectedStatus}`; %>
+                    
+                    <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+                        <a class="page-link rounded-3" href="<%= buildUrl(pagination.page - 1) %>">Previous</a>
+                    </li>
+                    <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+                        <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
+                            <a class="page-link rounded-3" href="<%= buildUrl(p) %>"><%= p %></a>
+                        </li>
+                    <% } %>
+                    <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
+                        <a class="page-link rounded-3" href="<%= buildUrl(pagination.page + 1) %>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    <% } %>
+</div>
+
+<!-- Detailed Ticket View Modal -->
+<div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-dark text-white rounded-top-4">
+                <h5 class="modal-title fw-bold" id="detailTicketTitle"><i class="fas fa-ticket-alt me-2 text-primary"></i>Ticket Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3" id="modalDetailContent">
+                    <!-- Dynamic Details Injected Here -->
+                </div>
+            </div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSelectAllTickets(master) {
+        const checkboxes = document.querySelectorAll('.ticket-select-chk');
+        checkboxes.forEach(chk => chk.checked = master.checked);
+        updateBulkDeleteState();
+    }
+
+    function updateBulkDeleteState() {
+        const checkboxes = document.querySelectorAll('.ticket-select-chk:checked');
+        const countSpan = document.getElementById('selectedTicketCount');
+        const btnBulk = document.getElementById('btnBulkDelete');
+        if (countSpan) countSpan.textContent = checkboxes.length;
+        if (btnBulk) {
+            if (checkboxes.length > 0) btnBulk.classList.remove('d-none');
+            else btnBulk.classList.add('d-none');
+        }
+    }
+
+    async function bulkDeleteSelectedTickets() {
+        const checkboxes = document.querySelectorAll('.ticket-select-chk:checked');
+        const ids = Array.from(checkboxes).map(chk => chk.value);
+
+        if (ids.length === 0) return;
+        if (!confirm(`Are you sure you want to PERMANENTLY DELETE ${ids.length} selected ticket(s)? This action cannot be undone.`)) return;
+
+        try {
+            const res = await fetch('/admin/tickets/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticketIds: ids })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (err) {
+            alert('Failed to bulk delete tickets.');
+        }
+    }
+
+    async function deleteSingleTicket(ticketId, ticketNum) {
+        if (!confirm(`Are you sure you want to delete ticket ${ticketNum || ''}? Capacity will be released back to the event.`)) return;
+
+        try {
+            const res = await fetch(`/admin/tickets/${ticketId}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (err) {
+            alert('Failed to delete ticket.');
+        }
+    }
+
+    async function cancelTicket(ticketId) {
+        if (!confirm('Are you sure you want to cancel this ticket? Capacity will be released back to the event pool.')) return;
+
+        try {
+            const res = await fetch(`/admin/tickets/${ticketId}/cancel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (err) {
+            alert('Failed to cancel ticket.');
+        }
+    }
+
+    function viewTicketDetails(t) {
+        const modalTitle = document.getElementById('detailTicketTitle');
+        const modalContent = document.getElementById('modalDetailContent');
+
+        if (modalTitle) modalTitle.innerHTML = `<i class="fas fa-ticket-alt me-2 text-primary"></i>Ticket: ${t.ticketNumber}`;
+
+        const bookingDate = t.booking && t.booking.createdAt ? new Date(t.booking.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : (t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A');
+        const eventDate = t.event && t.event.eventDate ? new Date(t.event.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
+        modalContent.innerHTML = `
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted fs-8 fw-bold text-uppercase">Attendee Details</div>
+                    <div class="fw-extrabold fs-6 text-dark mt-1">${t.customerName}</div>
+                    <div class="fs-7 text-dark"><i class="fas fa-phone me-1 text-primary"></i> ${t.customerMobile}</div>
+                    ${t.customerEmail ? `<div class="fs-7 text-dark"><i class="fas fa-envelope me-1 text-primary"></i> ${t.customerEmail}</div>` : ''}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted fs-8 fw-bold text-uppercase">Booking Info</div>
+                    <div class="fw-bold font-mono text-dark mt-1">ID: ${t.booking ? t.booking.bookingId : 'N/A'}</div>
+                    <div class="fs-7 text-dark"><i class="fas fa-layer-group me-1 text-info"></i> Quantity: <strong>${t.booking ? t.booking.quantity : 1} Ticket(s)</strong></div>
+                    <div class="fs-7 text-dark"><i class="fas fa-clock me-1 text-warning"></i> Booked On: ${bookingDate}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted fs-8 fw-bold text-uppercase">Event Info</div>
+                    <div class="fw-bold text-dark mt-1">${t.event ? t.event.name : 'N/A'}</div>
+                    <div class="fs-7 text-dark"><i class="fas fa-calendar me-1 text-primary"></i> ${eventDate} at ${t.event ? t.event.eventTime : ''}</div>
+                    <div class="fs-7 text-dark"><i class="fas fa-map-marker-alt me-1 text-danger"></i> ${t.event ? t.event.venue : ''}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted fs-8 fw-bold text-uppercase">Pass & Entry Status</div>
+                    <div class="mt-1">
+                        Pass Status: <span class="badge ${t.ticketStatus === 'VALID' ? 'bg-success' : 'bg-danger'}">${t.ticketStatus}</span>
+                    </div>
+                    <div class="mt-2">
+                        Entry Status: ${t.entryStatus === 'CHECKED_IN' ? `<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> CHECKED IN at ${t.checkedInAt ? new Date(t.checkedInAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''} (${t.checkedInGate || 'Gate Pass'})</span>` : `<span class="badge bg-warning text-dark">PENDING ENTRY</span>`}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
+        modal.show();
+    }
+</script>

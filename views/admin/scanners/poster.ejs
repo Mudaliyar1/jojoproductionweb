@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gate Scanner QR Poster - <%= link.name %></title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #F7F7F5;
+            color: #171717;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .poster-canvas {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            border: 2px solid #E4E4E7;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .event-subname {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #71717A;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .gate-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #171717;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .qr-quiet-zone {
+            background: #FFFFFF;
+            border: 2px solid #171717;
+            border-radius: 20px;
+            padding: 20px;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .qr-quiet-zone img {
+            width: 240px;
+            height: 240px;
+            display: block;
+        }
+
+        .instruction-box {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            color: #047857;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .btn-print-action {
+            background: #171717;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 14px 32px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            margin-top: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.15s ease;
+        }
+
+        @media print {
+            body { background: #FFFFFF; padding: 0; }
+            .poster-canvas { box-shadow: none; border-color: #000; max-width: 100%; }
+            .btn-print-action { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="poster-canvas">
+        <div class="event-subname"><i class="fas fa-calendar-alt me-1"></i> <%= event.name %></div>
+        <h1 class="gate-title"><%= link.name %> SCANNER</h1>
+
+        <div class="qr-quiet-zone">
+            <img src="<%= qrCodeDataUri %>" alt="Gate Scanner Access QR Code">
+        </div>
+
+        <div class="instruction-box">
+            <i class="fas fa-mobile-alt me-1"></i> SCAN THIS QR CODE WITH MOBILE CAMERA TO OPEN GATE TICKET SCANNER
+        </div>
+    </div>
+
+    <button onclick="window.print()" class="btn-print-action">
+        <i class="fas fa-print me-2"></i> Print Gate Scanner QR
+    </button>
+
+</body>
+</html>

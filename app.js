@@ -41,8 +41,17 @@ mongoose.connect(process.env.MONGODB_URI, {
             adminUser.password = 'admin123';
             adminUser.role = 'admin';
             await adminUser.save();
-            console.log(`Admin user updated for ${email}`);
         }
+    }
+
+    // Ensure Ticket indexes are synced and legacy global ticketNumber index is dropped
+    try {
+        const Ticket = require('./models/Ticket');
+        await Ticket.collection.dropIndex('ticketNumber_1').catch(() => {});
+        await Ticket.syncIndexes();
+        console.log('Ticket indexes synced successfully');
+    } catch (idxErr) {
+        console.warn('Index sync notice:', idxErr.message);
     }
 })
 .catch(err => console.error('MongoDB connection error:', err));
@@ -123,25 +132,50 @@ app.use('*', (req, res) => {
     res.status(404).render('404');
 });
 
-// WebSocket Server
+// WebSocket Server with Ping/Pong Heartbeat and JSON Messaging
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', ws => {
-    console.log('Client connected via WebSocket');
+    ws.isAlive = true;
+    ws.on('pong', () => { ws.isAlive = true; });
 
-    ws.on('message', message => {
-        console.log(`Received: ${message}`);
-        // Echo message back to client
-        ws.send(`Server received: ${message}`);
-    });
-
-    ws.on('close', () => {
-        console.log('Client disconnected from WebSocket');
+    ws.on('message', async (messageStr) => {
+        try {
+            const data = JSON.parse(messageStr);
+            if (data.type === 'PING') {
+                ws.send(JSON.stringify({ type: 'PONG' }));
+            } else if (data.type === 'FETCH_EVENT_STATS' && data.eventId) {
+                const Event = require('./models/Event');
+                const eventDoc = await Event.findById(data.eventId);
+                if (eventDoc) {
+                    ws.send(JSON.stringify({
+                        type: 'ATTENDANCE_CHECKIN',
+                        eventId: eventDoc._id.toString(),
+                        checkedInTickets: eventDoc.checkedInTickets || 0
+                    }));
+                }
+            }
+        } catch (e) {
+            // Ignore non-JSON messages cleanly
+        }
     });
 
     ws.on('error', error => {
         console.error('WebSocket error:', error);
     });
+});
+
+// 30s Heartbeat to keep WebSocket connections active
+const wsPingInterval = setInterval(() => {
+    wss.clients.forEach(ws => {
+        if (ws.isAlive === false) return ws.terminate();
+        ws.isAlive = false;
+        ws.ping();
+    });
+}, 30000);
+
+wss.on('close', () => {
+    clearInterval(wsPingInterval);
 });
 
 // Function to broadcast messages to all connected WebSocket clients

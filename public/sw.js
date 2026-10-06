@@ -1,19 +1,10 @@
-const CACHE_NAME = 'jojo-admin-erp-v6';
+const CACHE_NAME = 'jojo-pwa-online-v7';
 const STATIC_ASSETS = [
-    '/admin/invoice-system',
-    '/admin/invoice-system/invoices',
-    '/admin/invoice-system/estimates',
-    '/admin/invoice-system/clients',
-    '/admin/invoice-system/services',
-    '/admin/invoice-system/reports',
-    '/admin/invoice-system/settings',
-    '/admin/invoice-system/invoices/create',
-    '/admin/invoice-system/estimates/create',
     '/css/admin.css',
     '/css/invoice-system.css',
+    '/css/event-design-system.css',
     '/js/pwa-engine.js',
     '/js/invoice-editor.js',
-    '/js/offline-data-manager.js',
     '/manifest.json',
     '/images/icons/icon-192.svg',
     '/images/icons/icon-512.svg',
@@ -21,14 +12,15 @@ const STATIC_ASSETS = [
     '/images/icons/icon-512.png',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
 ];
 
-// Install Event - Pre-cache Static Assets & HTML Routes Individually
+// Install Event - Pre-cache Static Assets Only
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(async cache => {
-            console.log('[ServiceWorker v5] Pre-caching static assets individually for zero-fail resilience');
+            console.log('[ServiceWorker] Pre-caching static PWA app shell assets');
             await Promise.all(
                 STATIC_ASSETS.map(url => {
                     return fetch(url, { redirect: 'follow' }).then(response => {
@@ -49,7 +41,7 @@ self.addEventListener('activate', event => {
             return Promise.all(
                 keys.map(key => {
                     if (key !== CACHE_NAME) {
-                        console.log('[ServiceWorker] Cleaning old cache:', key);
+                        console.log('[ServiceWorker] Cleaning legacy offline cache:', key);
                         return caches.delete(key);
                     }
                 })
@@ -58,16 +50,24 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch Event - Guaranteed Response Caching Strategy (Prevents ERR_FAILED)
+// Fetch Event - Online-Only ERP Strategy with Offline Fallback Screen
 self.addEventListener('fetch', event => {
     const req = event.request;
     const url = new URL(req.url);
 
-    // Skip non-GET requests (handled by IndexedDB queue)
+    // Non-GET requests always bypass service worker cache
     if (req.method !== 'GET') return;
 
-    // 1. Static Assets (CSS, JS, CDNs, Fonts, Images) -> Cache First
-    if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.includes('/fonts/') || url.pathname.includes('/images/') || url.hostname.includes('cdn') || url.hostname.includes('cdnjs') || url.hostname.includes('fonts.googleapis.com')) {
+    // 1. Static Assets (CSS, JS, Fonts, Icons, Images, CDNs) -> Cache First
+    if (url.pathname.endsWith('.css') || 
+        url.pathname.endsWith('.js') || 
+        url.pathname.includes('/fonts/') || 
+        url.pathname.includes('/images/') || 
+        url.pathname.includes('/icons/') || 
+        url.hostname.includes('cdn') || 
+        url.hostname.includes('cdnjs') || 
+        url.hostname.includes('fonts.googleapis.com')) {
+        
         event.respondWith(
             caches.match(req, { ignoreSearch: true }).then(cachedRes => {
                 const fetchPromise = fetch(req).then(networkRes => {
@@ -84,132 +84,132 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // 2. HTML Admin Navigation Requests -> Guaranteed Response (Prevents ERR_FAILED)
+    // 2. Dynamic ERP Navigation & Business API Requests -> Strictly Network Only
+    // Dynamic ERP business data must ALWAYS come fresh from MongoDB via Node.js server
     if (req.mode === 'navigate' || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'))) {
         event.respondWith(
-            (async () => {
-                // Step A: Check exact URL in cache
-                let cachedRes = await caches.match(req, { ignoreSearch: true });
-                if (cachedRes) {
-                    // Update cache in background if online
-                    fetch(req).then(async networkRes => {
-                        if (networkRes && networkRes.status === 200) {
-                            const cache = await caches.open(CACHE_NAME);
-                            await cache.put(req, networkRes);
-                        }
-                    }).catch(() => {});
-                    return cachedRes;
-                }
-
-                // Step B: Try fetching from network if online
-                if (navigator.onLine) {
-                    try {
-                        const networkRes = await fetch(req);
-                        if (networkRes && (networkRes.status === 200 || networkRes.status === 304)) {
-                            const resClone = networkRes.clone();
-                            const cache = await caches.open(CACHE_NAME);
-                            await cache.put(req, resClone);
-                            return networkRes;
-                        }
-                    } catch(e) {}
-                }
-
-                // Step C: Try fallback dashboard route from cache
-                let fallbackDashboard = await caches.match('/admin/invoice-system', { ignoreSearch: true });
-                if (fallbackDashboard) return fallbackDashboard;
-
-                // Step D: Search any cached HTML page starting with /admin/
-                try {
-                    const keys = await caches.keys();
-                    for (let key of keys) {
-                        const cache = await caches.open(key);
-                        const requests = await cache.keys();
-                        for (let r of requests) {
-                            if (r.url.includes('/admin/')) {
-                                const match = await cache.match(r);
-                                if (match) return match;
-                            }
-                        }
-                    }
-                } catch(err) {}
-
-                // Step E: Guaranteed Response Shell (Prevents ERR_FAILED completely!)
+            fetch(req).catch(() => {
                 return new Response(getOfflineHtmlShell(), {
-                    status: 200,
+                    status: 503,
                     headers: { 'Content-Type': 'text/html; charset=utf-8' }
                 });
-            })()
+            })
         );
         return;
     }
 
-    // 3. API & Other GET Requests -> Network First with Cache Fallback
+    // 3. API Requests -> Network Only with JSON Offline Error Fallback
     event.respondWith(
-        fetch(req).then(networkRes => {
-            if (networkRes.status === 200) {
-                const resClone = networkRes.clone();
-                caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
-            }
-            return networkRes;
-        }).catch(async () => {
-            const cachedRes = await caches.match(req, { ignoreSearch: true });
-            if (cachedRes) return cachedRes;
-            const fallbackDashboard = await caches.match('/admin/invoice-system', { ignoreSearch: true });
-            if (fallbackDashboard) return fallbackDashboard;
-
-            return new Response(getOfflineHtmlShell(), {
-                status: 200,
-                headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        fetch(req).catch(() => {
+            return new Response(JSON.stringify({ 
+                error: 'NO_INTERNET', 
+                message: "An active internet connection is required to interact with Jojo ERP." 
+            }), {
+                status: 503,
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
             });
         })
     );
 });
 
-// Dynamic Offline HTML Shell (Guarantees Chrome/Brave NEVER displays ERR_FAILED)
+// Clean, Professional Offline State HTML Shell
 function getOfflineHtmlShell() {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jojo's Production Admin ERP (Offline Workspace)</title>
+    <title>You're Offline - Jojo ERP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/admin.css">
-    <link rel="stylesheet" href="/css/invoice-system.css">
-    <link rel="manifest" href="/manifest.json">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 24px;
+        }
+        .offline-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            background: #fef2f2;
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 24px auto;
+        }
+        .offline-title {
+            font-weight: 800;
+            color: #0f172a;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .offline-desc {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+        .btn-retry {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 14px;
+            padding: 14px 32px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .btn-retry:hover {
+            background-color: #1e293b;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg fixed-top admin-navbar px-3">
-        <div class="container-fluid p-0">
-            <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/admin/invoice-system">
-                <div class="brand-logo-icon"><i class="fas fa-film"></i></div>
-                <span class="brand-text">Jojo's Production</span>
-            </a>
-            <span class="badge bg-warning text-dark border border-warning ms-auto">
-                <i class="fas fa-wifi-slash me-1"></i>Working Offline Mode
-            </span>
+<body>
+    <div class="offline-card">
+        <div class="offline-icon">
+            <i class="fas fa-wifi-slash"></i>
         </div>
-    </nav>
-    <div class="container-fluid px-4" style="margin-top: 90px;">
-        <div class="p-5 bg-white rounded-4 shadow-sm text-center border my-4">
-            <div class="mb-3 text-warning"><i class="fas fa-satellite-dish fa-3x"></i></div>
-            <h3 class="fw-bold text-dark mb-2">Jojo ERP Offline Workspace</h3>
-            <p class="text-secondary mb-4 mx-auto" style="max-width: 540px;">You are currently working offline. All invoices, estimates, clients, and services created or edited now are safely saved in IndexedDB and will sync automatically when internet returns.</p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="/admin/invoice-system/invoices/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Create Invoice Offline</a>
-                <a href="/admin/invoice-system/estimates/create" class="btn btn-outline-primary"><i class="fas fa-plus me-1"></i>Create Estimate Offline</a>
-            </div>
-        </div>
+        <h1 class="offline-title">You're Offline</h1>
+        <p class="offline-desc">
+            An internet connection is required to use Jojo ERP.<br>
+            Please reconnect to continue.
+        </p>
+        <button class="btn-retry" onclick="window.location.reload()">
+            <i class="fas fa-sync-alt"></i> Retry Connection
+        </button>
     </div>
-    <script src="/js/pwa-engine.js"></script>
 </body>
 </html>`;
 }
 
 // Push Notification Event Handler
 self.addEventListener('push', event => {
-    let data = { title: "Jojo's Production Alert", body: "New admin notification", url: "/admin/invoice-system" };
+    let data = { title: "Jojo's Production Alert", body: "New admin notification", url: "/admin" };
     try {
         if (event.data) data = event.data.json();
     } catch(e) {
@@ -221,11 +221,7 @@ self.addEventListener('push', event => {
         icon: '/images/icons/icon-192.png',
         badge: '/images/icons/icon-192.png',
         vibrate: [100, 50, 100],
-        data: { url: data.url || '/admin/invoice-system' },
-        actions: [
-            { action: 'open', title: 'Open Page' },
-            { action: 'close', title: 'Dismiss' }
-        ]
+        data: { url: data.url || '/admin' }
     };
 
     event.waitUntil(
@@ -236,9 +232,7 @@ self.addEventListener('push', event => {
 // Notification Click Handler
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    if (event.action === 'close') return;
-
-    const urlToOpen = event.notification.data ? event.notification.data.url : '/admin/invoice-system';
+    const urlToOpen = event.notification.data ? event.notification.data.url : '/admin';
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
             for (let client of windowClients) {
@@ -251,17 +245,4 @@ self.addEventListener('notificationclick', event => {
             }
         })
     );
-});
-
-// Background Sync Listener
-self.addEventListener('sync', event => {
-    if (event.tag === 'sync-pending-queue') {
-        event.waitUntil(
-            self.clients.matchAll().then(clients => {
-                clients.forEach(client => {
-                    client.postMessage({ type: 'TRIGGER_BACKGROUND_SYNC' });
-                });
-            })
-        );
-    }
 });

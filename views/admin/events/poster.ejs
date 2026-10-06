@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Booking QR Poster - <%= event.name %></title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #F7F7F5;
+            color: #171717;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .poster-canvas {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            border: 2px solid #E4E4E7;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .poster-event-badge {
+            display: inline-block;
+            background: #F4F4F5;
+            border: 1px solid #E4E4E7;
+            color: #52525B;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        .poster-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #171717;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .poster-meta {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #52525B;
+            margin-bottom: 28px;
+        }
+
+        .scan-instruction-box {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #171717;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .qr-quiet-zone {
+            background: #FFFFFF;
+            border: 2px solid #171717;
+            border-radius: 20px;
+            padding: 20px;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .qr-quiet-zone img {
+            width: 260px;
+            height: 260px;
+            display: block;
+        }
+
+        .price-badge-poster {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #047857;
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            border-radius: 14px;
+            padding: 8px 24px;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .capacity-notice {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #71717A;
+            margin-bottom: 24px;
+        }
+
+        .footer-note {
+            background: #F4F4F5;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #52525B;
+        }
+
+        .btn-print-action {
+            background: #171717;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 14px 32px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            margin-top: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.15s ease;
+        }
+
+        .btn-print-action:hover {
+            background: #27272A;
+        }
+
+        @media print {
+            body { background: #FFFFFF; padding: 0; }
+            .poster-canvas { box-shadow: none; border-color: #000; max-width: 100%; }
+            .btn-print-action { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="poster-canvas">
+        <div class="poster-event-badge"><i class="fas fa-ticket-alt me-1"></i> OFFICIAL EVENT TICKETS</div>
+        
+        <h1 class="poster-title"><%= event.name %></h1>
+        
+        <div class="poster-meta">
+            <i class="far fa-calendar-alt me-1"></i> <%= new Date(event.eventDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %> • <%= event.venue %>
+        </div>
+
+        <div class="scan-instruction-box">
+            <i class="fas fa-camera me-1"></i> SCAN TO BOOK YOUR TICKET
+        </div>
+
+        <!-- High-Contrast QR Code Quiet Zone -->
+        <div class="qr-quiet-zone">
+            <img src="<%= qrCodeDataUri %>" alt="Event Common Booking QR Code">
+        </div>
+
+        <div>
+            <% if (event.ticketPrice === 0) { %>
+                <div class="price-badge-poster">FREE ENTRY</div>
+            <% } else { %>
+                <div class="price-badge-poster">₹<%= event.ticketPrice %> / TICKET</div>
+            <% } %>
+        </div>
+
+        <div class="capacity-notice">
+            <%= event.totalTickets.toLocaleString() %> TICKETS CAPACITY
+        </div>
+
+        <div class="footer-note">
+            <i class="fas fa-mobile-alt me-1"></i> SCAN WITH YOUR NORMAL PHONE CAMERA TO BOOK INSTANTLY
+        </div>
+    </div>
+
+    <button onclick="window.print()" class="btn-print-action">
+        <i class="fas fa-print me-2"></i> Print Poster (A4/A3)
+    </button>
+
+</body>
+</html>

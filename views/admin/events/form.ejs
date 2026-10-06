@@ -1,0 +1,109 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark m-0"><i class="fas fa-calendar-plus text-primary me-2"></i>Create New Event</h3>
+        <p class="text-muted small m-0">Setup event details, ticket price, capacity limits, and generate common booking QR code.</p>
+    </div>
+    <a href="/admin/events" class="btn btn-outline-secondary rounded-3 fw-bold">
+        <i class="fas fa-arrow-left me-1"></i> Back to Events
+    </a>
+</div>
+
+<form action="/admin/events/create" method="POST" enctype="multipart/form-data">
+    <div class="row g-4">
+        <!-- Left Column: Core Event Info -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-info-circle text-primary me-2"></i>Event Information</h5>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">Event Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="name" name="name" placeholder="e.g. JOJO DJ NIGHT" required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="eventDate" class="form-label fw-bold">Event Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control rounded-3" id="eventDate" name="eventDate" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="eventTime" class="form-label fw-bold">Event Time <span class="text-danger">*</span></label>
+                        <input type="time" class="form-control rounded-3" id="eventTime" name="eventTime" value="19:00" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="venue" class="form-label fw-bold">Venue Location <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control rounded-3" id="venue" name="venue" placeholder="e.g. Grand Arena, Ahmedabad" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label fw-bold">Event Description</label>
+                    <textarea class="form-control rounded-3" id="description" name="description" rows="3" placeholder="Brief details about the event..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="bannerImage" class="form-label fw-bold">Event Banner / Poster Image</label>
+                    <input type="file" class="form-control rounded-3" id="bannerImage" name="bannerImage" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Ticket Settings & Capacity -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-ticket-alt text-warning me-2"></i>Ticket Configuration</h5>
+
+                <div class="mb-3">
+                    <label for="totalTickets" class="form-label fw-bold">Total Ticket Capacity <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control rounded-3" id="totalTickets" name="totalTickets" value="2500" min="1" required>
+                    <div class="form-text fs-8">System will never allow bookings beyond this capacity.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ticketPrice" class="form-label fw-bold">Ticket Price (₹) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold">₹</span>
+                        <input type="number" class="form-control" id="ticketPrice" name="ticketPrice" value="0" min="0" step="1" required>
+                    </div>
+                    <div class="form-text fs-8">Set to 0 for FREE ENTRY. Public page displays "FREE ENTRY".</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ticketType" class="form-label fw-bold">Ticket Type Name</label>
+                    <input type="text" class="form-control rounded-3" id="ticketType" name="ticketType" value="ENTRY TICKET">
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label for="minTicketsPerBooking" class="form-label fw-bold fs-7">Min / Booking</label>
+                        <input type="number" class="form-control rounded-3" id="minTicketsPerBooking" name="minTicketsPerBooking" value="1" min="1" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="maxTicketsPerBooking" class="form-label fw-bold fs-7">Max / Booking</label>
+                        <input type="number" class="form-control rounded-3" id="maxTicketsPerBooking" name="maxTicketsPerBooking" value="200" min="1" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ticketMode" class="form-label fw-bold">Ticket QR Generation Mode</label>
+                    <select class="form-select rounded-3" id="ticketMode" name="ticketMode">
+                        <option value="INDIVIDUAL_QR" selected>Option B: Individual Ticket QR per attendee (Recommended)</option>
+                        <option value="SINGLE_GROUP_QR">Option A: One booking QR for entire group</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label for="bookingStatus" class="form-label fw-bold">Initial Booking Status</label>
+                    <select class="form-select rounded-3" id="bookingStatus" name="bookingStatus">
+                        <option value="OPEN" selected>OPEN (Booking active)</option>
+                        <option value="CLOSED">CLOSED (Booking paused)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary fw-bold rounded-3 w-100 py-3 shadow-sm">
+                    <i class="fas fa-check-circle me-1"></i> Save Event & Generate Common QR
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
