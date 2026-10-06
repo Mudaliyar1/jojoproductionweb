@@ -8,6 +8,7 @@ const InvoiceSettings = require('../models/InvoiceSettings');
 const InvoiceActivityLog = require('../models/InvoiceActivityLog');
 const { logActivity } = require('../helpers/logHelper');
 const { generateUpiQrUrl } = require('../helpers/qrHelper');
+const { formatISTInputDate, parseISTDateTime, getISTNow } = require('../utils/dateUtils');
 
 // Helper to ensure settings exist
 const getOrCreateSettings = async () => {
@@ -43,9 +44,10 @@ const seedDefaultTemplates = async () => {
 exports.getDashboard = async (req, res) => {
     try {
         await seedDefaultTemplates();
-        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
+        const todayISTStr = formatISTInputDate(new Date());
+        const startOfToday = parseISTDateTime(todayISTStr, '00:00');
+        const monthISTStr = `${todayISTStr.slice(0, 7)}-01`;
+        const startOfMonth = parseISTDateTime(monthISTStr, '00:00');
 
         const totalEstimates = await Estimate.countDocuments();
         const draftEstimates = await Estimate.countDocuments({ status: 'Draft' });

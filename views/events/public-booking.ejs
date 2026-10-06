@@ -88,7 +88,7 @@
                         <div class="meta-icon-box"><i class="far fa-calendar-alt"></i></div>
                         <div>
                             <div class="ds-text-sm">Date</div>
-                            <div class="fw-bold text-dark"><%= new Date(event.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                            <div class="fw-bold text-dark"><%= formatISTDate(event.eventDate, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
                         </div>
                     </div>
 
@@ -96,7 +96,7 @@
                         <div class="meta-icon-box"><i class="far fa-clock"></i></div>
                         <div>
                             <div class="ds-text-sm">Time</div>
-                            <div class="fw-bold text-dark"><%= event.eventTime %></div>
+                            <div class="fw-bold text-dark"><%= event.eventTime %> IST</div>
                         </div>
                     </div>
 

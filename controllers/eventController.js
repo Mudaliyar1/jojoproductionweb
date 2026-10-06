@@ -4,6 +4,7 @@ const Ticket = require('../models/Ticket');
 const ScannerLink = require('../models/ScannerLink');
 const Entry = require('../models/Entry');
 const QRCode = require('qrcode');
+const { formatISTDate, formatISTTime, formatISTDateTime, parseISTDateTime, getISTNow } = require('../utils/dateUtils');
 
 // ==========================================
 // PUBLIC EVENT BOOKING CONTROLLERS
@@ -346,7 +347,7 @@ exports.createEvent = async (req, res) => {
             name,
             slug,
             description: description || '',
-            eventDate: new Date(eventDate),
+            eventDate: parseISTDateTime(eventDate, eventTime || '19:00'),
             eventTime: eventTime || '19:00',
             venue,
             totalTickets: parseInt(totalTickets, 10) || 2500,
@@ -360,7 +361,9 @@ exports.createEvent = async (req, res) => {
         });
 
         if (req.file) {
-            newEvent.bannerImage = `/uploads/${req.file.filename}`;
+            newEvent.bannerImage = req.file.buffer 
+                ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` 
+                : `/uploads/${req.file.filename}`;
         }
 
         await newEvent.save();
@@ -447,7 +450,7 @@ exports.updateEventSettings = async (req, res) => {
 
         event.name = name;
         event.description = description || '';
-        event.eventDate = new Date(eventDate);
+        event.eventDate = parseISTDateTime(eventDate, eventTime || '19:00');
         event.eventTime = eventTime || '19:00';
         event.venue = venue;
         event.totalTickets = newTotalCapacity;
@@ -466,7 +469,9 @@ exports.updateEventSettings = async (req, res) => {
         }
 
         if (req.file) {
-            event.bannerImage = `/uploads/${req.file.filename}`;
+            event.bannerImage = req.file.buffer 
+                ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` 
+                : `/uploads/${req.file.filename}`;
         }
 
         await event.save();
@@ -804,13 +809,13 @@ exports.validateTicketScan = async (req, res) => {
                 ticketNumber: ticket.ticketNumber,
                 customerName: ticket.customerName,
                 eventName: event.name,
-                checkedInAt: ticket.checkedInAt ? ticket.checkedInAt.toLocaleString() : 'Earlier',
+                checkedInAt: ticket.checkedInAt ? formatISTDateTime(ticket.checkedInAt) + ' IST' : 'Earlier',
                 checkedInBy: ticket.checkedInBy || 'Security Staff',
                 gate: ticket.checkedInGate || 'Main Gate',
                 stats: {
                     checkedIn: currentEvt ? currentEvt.checkedInTickets : 0
                 },
-                message: `Ticket was already checked in at ${ticket.checkedInGate || 'Main Gate'}. DO NOT COUNT AGAIN!`
+                message: `Ticket was already checked in at ${ticket.checkedInGate || 'Main Gate'} on ${formatISTTime(ticket.checkedInAt)} IST. DO NOT COUNT AGAIN!`
             });
         }
 
@@ -853,7 +858,7 @@ exports.validateTicketScan = async (req, res) => {
             venue: event.venue,
             ticketType: event.ticketType,
             quantity: ticket.booking ? ticket.booking.quantity : 1,
-            bookingDate: ticket.createdAt ? ticket.createdAt.toLocaleDateString() : '',
+            bookingDate: ticket.createdAt ? formatISTDate(ticket.createdAt) : '',
             entryStatus: 'CHECKED_IN',
             stats: {
                 checkedIn: currentCheckedIn
@@ -1147,12 +1152,12 @@ exports.validatePublicScannerScan = async (req, res) => {
                 title: '⚠ ALREADY CHECKED IN',
                 ticketNumber: ticket.ticketNumber,
                 customerName: ticket.customerName,
-                checkedInAt: ticket.checkedInAt ? ticket.checkedInAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Earlier',
+                checkedInAt: ticket.checkedInAt ? formatISTTime(ticket.checkedInAt) + ' IST' : 'Earlier',
                 checkedInGate: ticket.checkedInGate || 'Previous Gate',
                 stats: {
                     checkedIn: currentEvtObj ? currentEvtObj.checkedInTickets : 0
                 },
-                message: `Ticket was already checked in at ${ticket.checkedInGate || 'Previous Gate'}. DO NOT COUNT AGAIN!`
+                message: `Ticket was already checked in at ${ticket.checkedInGate || 'Previous Gate'} on ${formatISTTime(ticket.checkedInAt)} IST. DO NOT COUNT AGAIN!`
             });
         }
 
@@ -1212,7 +1217,7 @@ exports.validatePublicScannerScan = async (req, res) => {
             quantity: ticket.booking ? ticket.booking.quantity : 1,
             gate: scannerLink.gateNumber || scannerLink.name,
             scannerName: scannerLink.name,
-            entryTime: ticket.checkedInAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            entryTime: formatISTTime(ticket.checkedInAt) + ' IST',
             stats: {
                 checkedIn: authoritativeCheckedIn
             },
@@ -1310,8 +1315,8 @@ exports.createScannerLink = async (req, res) => {
             staffName: staffName || '',
             staffPhone: staffPhone || '',
             description: description || '',
-            validFrom: validFrom ? new Date(validFrom) : null,
-            validUntil: validUntil ? new Date(validUntil) : null,
+            validFrom: validFrom ? parseISTDateTime(validFrom) : null,
+            validUntil: validUntil ? parseISTDateTime(validUntil) : null,
             status: status || 'ACTIVE'
         });
 

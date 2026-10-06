@@ -14,6 +14,9 @@
     <!-- Event Design System CSS -->
     <link rel="stylesheet" href="/css/event-design-system.css">
 
+    <!-- html2pdf.js for Direct Client-Side PDF Downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         body {
             background-color: var(--ds-bg);
@@ -29,12 +32,14 @@
             max-width: 480px;
             margin: 0 auto 24px auto;
             position: relative;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
 
         .ticket-card-header {
             background-color: var(--ds-primary);
             color: #FFFFFF;
-            padding: 24px;
+            padding: 20px 24px;
             text-align: center;
         }
 
@@ -64,17 +69,19 @@
         }
 
         .ticket-meta-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             color: var(--ds-text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            margin-bottom: 2px;
         }
 
         .ticket-meta-val {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 700;
             color: var(--ds-text-primary);
+            word-break: break-word;
         }
 
         @media print {
@@ -86,10 +93,10 @@
 </head>
 <body>
 
-    <div class="container" style="max-width: 520px;">
+    <div id="ticketPassesContainer" class="container" style="max-width: 520px;">
         
         <!-- Header Banner -->
-        <div class="text-center mb-4">
+        <div class="text-center mb-4 btn-print-hide">
             <span class="ds-badge ds-badge-success mb-2">
                 <i class="fas fa-check-circle me-1"></i> BOOKING CONFIRMED
             </span>
@@ -99,7 +106,16 @@
 
         <!-- Loop for Individual Digital Pass Cards -->
         <% tickets.forEach(function(t, idx) { %>
-            <div class="ticket-card-digital">
+            <div id="ticketCard_<%= idx %>" class="ticket-card-digital">
+                <!-- Top Card Confirmation Banner -->
+                <div class="text-center py-3 px-4 bg-success-subtle border-bottom border-success-subtle">
+                    <span class="badge bg-success text-white fw-bold px-3 py-1 rounded-pill mb-1">
+                        <i class="fas fa-check-circle me-1"></i> BOOKING CONFIRMED
+                    </span>
+                    <h4 class="fw-extrabold text-dark m-0 fs-5">You're All Set!</h4>
+                    <div class="fs-8 text-muted">Official Event Entry Pass</div>
+                </div>
+
                 <!-- Top Pass Header -->
                 <div class="ticket-card-header">
                     <div class="ds-text-sm text-white-50 text-uppercase fw-bold tracking-wider mb-1">
@@ -111,19 +127,19 @@
                 <div class="ticket-card-body text-center">
                     <!-- Prominent Clean QR Code -->
                     <div class="ds-qr-container mb-3">
-                        <img src="<%= t.qrDataUri %>" alt="Ticket QR Code" style="width: 220px; height: 220px;">
+                        <img src="<%= t.qrDataUri %>" alt="Ticket QR Code" style="width: 220px; height: 220px; display: inline-block; max-width: 100%;" crossorigin="anonymous">
                     </div>
 
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-4 btn-print-hide flex-wrap">
                         <div class="ds-text-sm fw-bold text-dark me-2">
                             <i class="fas fa-qrcode me-1"></i> Scan at venue entrance
                         </div>
-                        <button onclick="window.print()" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 fw-bold">
-                            <i class="fas fa-download me-1 text-danger"></i> Download PDF
+                        <button id="btnDownloadCard_<%= idx %>" onclick="downloadTicketPDF('<%= t.ticketNumber %>', 'ticketCard_<%= idx %>', 'btnDownloadCard_<%= idx %>')" class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-bold shadow-sm">
+                            <i class="fas fa-file-pdf me-1 text-danger"></i> Download PDF
                         </button>
                     </div>
 
-                    <!-- Ticket Details Grid -->
+                    <!-- Complete Ticket Details Grid -->
                     <div class="row g-3 text-start pt-3 border-top">
                         <div class="col-6">
                             <div class="ticket-meta-label">Event Name</div>
@@ -134,12 +150,16 @@
                             <div class="ticket-meta-val"><%= t.customerName %></div>
                         </div>
                         <div class="col-6">
-                            <div class="ticket-meta-label">Event Date</div>
-                            <div class="ticket-meta-val"><%= new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                            <div class="ticket-meta-label">Mobile Number</div>
+                            <div class="ticket-meta-val"><%= t.customerMobile %></div>
                         </div>
                         <div class="col-6">
-                            <div class="ticket-meta-label">Time</div>
-                            <div class="ticket-meta-val"><%= event.eventTime %></div>
+                            <div class="ticket-meta-label">Event Date</div>
+                            <div class="ticket-meta-val"><%= formatISTDate(event.eventDate) %></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="ticket-meta-label">Event Time</div>
+                            <div class="ticket-meta-val"><%= event.eventTime %> IST</div>
                         </div>
                         <div class="col-6">
                             <div class="ticket-meta-label">Pass Quantity</div>
@@ -147,7 +167,11 @@
                         </div>
                         <div class="col-6">
                             <div class="ticket-meta-label">Booked Date & Time</div>
-                            <div class="ticket-meta-val"><%= new Date(booking.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) %></div>
+                            <div class="ticket-meta-val"><%= formatISTDateTime(booking.createdAt) %> IST</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="ticket-meta-label">Payment Status</div>
+                            <div class="ticket-meta-val text-success"><%= booking.unitPrice === 0 ? 'FREE ENTRY' : 'CONFIRMED (₹' + booking.totalAmount + ')' %></div>
                         </div>
                         <div class="col-12">
                             <div class="ticket-meta-label">Venue Location</div>
@@ -161,21 +185,95 @@
                 <!-- Footer details -->
                 <div class="px-4 py-3 bg-light d-flex justify-content-between align-items-center ds-text-sm">
                     <span><i class="fas fa-receipt me-1"></i> Booking ID: <strong><%= booking.bookingId %></strong></span>
-                    <span>Status: <strong class="<%= booking.bookingStatus === 'CONFIRMED' ? 'text-success' : 'text-warning' %>"><%= booking.bookingStatus || 'CONFIRMED' %></strong></span>
+                    <span>Pass Status: <strong class="<%= t.ticketStatus === 'CANCELLED' ? 'text-danger' : 'text-success' %>"><%= t.ticketStatus || 'VALID' %></strong></span>
+                </div>
+
+                <!-- Entry Instructions -->
+                <div class="px-4 py-2 bg-light text-center border-top text-muted fs-8">
+                    <i class="fas fa-shield-alt text-primary me-1"></i> Present this digital pass QR code at the entrance for verification.
                 </div>
             </div>
         <% }); %>
 
         <!-- Print / PDF Download Action Buttons -->
         <div class="text-center btn-print-hide mb-4">
-            <button onclick="window.print()" class="ds-btn ds-btn-primary w-100 py-3 mb-2">
-                <i class="fas fa-file-pdf me-2"></i> Download / Print Digital Passes (PDF)
+            <button id="btnMainDownloadPdf" onclick="downloadTicketPDF('<%= booking.bookingId %>', 'ticketPassesContainer', 'btnMainDownloadPdf')" class="ds-btn ds-btn-primary w-100 py-3 mb-2">
+                <i class="fas fa-file-pdf me-2"></i> Download Digital Passes (PDF)
             </button>
-            <div class="ds-text-sm">
-                Tip: Click "Download / Print" and select "Save as PDF", take a screenshot, or keep this page open on your phone.
+            <div class="ds-text-sm text-muted">
+                Click to directly save your ticket pass as a PDF file onto your device.
             </div>
         </div>
     </div>
 
+    <!-- Direct PDF Download Engine Script -->
+    <script>
+        async function downloadTicketPDF(ticketNum, targetId, btnId) {
+            const btn = document.getElementById(btnId);
+            const originalHTML = btn ? btn.innerHTML : '';
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Generating PDF...`;
+            }
+
+            const originalElement = document.getElementById(targetId) || document.getElementById('ticketPassesContainer');
+            if (!originalElement) return;
+
+            // Clone element to prevent UI disruption or scroll clipping
+            const clone = originalElement.cloneNode(true);
+            
+            // Remove all interactive action buttons in clone
+            const hideElements = clone.querySelectorAll('.btn-print-hide');
+            hideElements.forEach(el => el.remove());
+
+            // Wrap clone in a clean off-screen container positioned at top-left
+            const container = document.createElement('div');
+            container.style.position = 'absolute';
+            container.style.top = '-9999px';
+            container.style.left = '0';
+            container.style.width = '480px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.padding = '10px';
+            container.appendChild(clone);
+            document.body.appendChild(container);
+
+            const opt = {
+                margin:       [8, 8, 8, 8],
+                filename:     `Ticket-${ticketNum || 'Pass'}.pdf`,
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: true, 
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollY: 0,
+                    scrollX: 0
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            try {
+                if (typeof html2pdf === 'function') {
+                    await html2pdf().set(opt).from(clone).save();
+                } else {
+                    window.print();
+                }
+            } catch (err) {
+                console.error('PDF download error:', err);
+                window.print();
+            } finally {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                }
+            }
+        }
+    </script>
 </body>
 </html>

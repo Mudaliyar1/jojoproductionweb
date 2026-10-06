@@ -14,15 +14,8 @@ const methodOverride = require('method-override');
 const invoiceController = require('../controllers/invoiceController');
 const eventController = require('../controllers/eventController');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname))
-    }
-});
+// Configure multer for in-memory file uploads (Vercel & cloud compatible)
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
     storage: storage,
@@ -35,6 +28,17 @@ const upload = multer({
     },
     limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
 });
+
+const getFileUrl = file => {
+    if (!file) return '';
+    if (file.buffer) {
+        return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    }
+    if (file.filename) {
+        return `/uploads/${file.filename}`;
+    }
+    return typeof file === 'string' ? file : '';
+};
 
 // Active nav state middleware
 router.use((req, res, next) => {
@@ -425,8 +429,8 @@ router.get('/services/edit/:id', isAdmin, async (req, res) => {
 router.post('/services/add', isAdmin, upload.fields([{ name: 'images', maxCount: 10 }, { name: 'videos', maxCount: 5 }]), async (req, res) => {
     try {
         const { title, description, featured } = req.body;
-        const images = req.files.images ? req.files.images.map(file => `/uploads/${file.filename}`) : [];
-        const videos = req.files.videos ? req.files.videos.map(file => `/uploads/${file.filename}`) : [];
+        const images = req.files.images ? req.files.images.map(getFileUrl) : [];
+        const videos = req.files.videos ? req.files.videos.map(getFileUrl) : [];
 
         const service = new Service({
             title,
@@ -460,14 +464,14 @@ router.post('/services/edit/:id', isAdmin, upload.fields([{ name: 'images', maxC
         let videos = service.videos;
 
         // Handle new image uploads
-        if (req.files.images) {
-            const newImages = req.files.images.map(file => `/uploads/${file.filename}`);
+        if (req.files && req.files.images) {
+            const newImages = req.files.images.map(getFileUrl);
             images = [...images, ...newImages];
         }
 
         // Handle new video uploads
-        if (req.files.videos) {
-            const newVideos = req.files.videos.map(file => `/uploads/${file.filename}`);
+        if (req.files && req.files.videos) {
+            const newVideos = req.files.videos.map(getFileUrl);
             videos = [...videos, ...newVideos];
         }
 
@@ -623,11 +627,11 @@ router.post('/about/update', isAdmin, upload.single('logo'), async (req, res) =>
             about.mission = mission;
             about.story = story;
             if (req.file) {
-                about.logo = `/uploads/${req.file.filename}`;
+                about.logo = getFileUrl(req.file);
             }
             await about.save();
         } else {
-            const logo = req.file ? `/uploads/${req.file.filename}` : '';
+            const logo = req.file ? getFileUrl(req.file) : '';
             about = new About({ content, mission, story, logo });
             await about.save();
         }
@@ -649,7 +653,7 @@ router.post('/about/team/add', isAdmin, upload.single('image'), async (req, res)
             name,
             role,
             description,
-            image: req.file ? `/uploads/${req.file.filename}` : '',
+            image: req.file ? getFileUrl(req.file) : '',
             order: parseInt(order) || 0
         });
         await teamMember.save();
@@ -674,7 +678,7 @@ router.post('/about/team/edit/:id', isAdmin, upload.single('image'), async (req,
         };
         
         if (req.file) {
-            updateData.image = `/uploads/${req.file.filename}`;
+            updateData.image = getFileUrl(req.file);
         }
         
         await TeamMember.findByIdAndUpdate(req.params.id, updateData);

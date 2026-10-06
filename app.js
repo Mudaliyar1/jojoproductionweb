@@ -81,12 +81,19 @@ app.use(session({
 
 app.use(flash());
 
-// Global variables for flash messages
+const dateUtils = require('./utils/dateUtils');
+
+// Global variables for flash messages & IST date helpers
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
     res.locals.user = req.session.user || null;
+    res.locals.formatISTDate = dateUtils.formatISTDate;
+    res.locals.formatISTTime = dateUtils.formatISTTime;
+    res.locals.formatISTDateTime = dateUtils.formatISTDateTime;
+    res.locals.formatISTInputDate = dateUtils.formatISTInputDate;
+    res.locals.formatISTInputTime = dateUtils.formatISTInputTime;
     next();
 });
 

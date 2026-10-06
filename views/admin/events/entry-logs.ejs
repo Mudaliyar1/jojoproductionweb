@@ -66,8 +66,8 @@
                     <% entries.forEach(function(e) { %>
                         <tr>
                             <td class="ps-4 text-muted fs-8">
-                                <div class="fw-bold text-dark"><%= new Date(e.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}) %></div>
-                                <div><%= new Date(e.createdAt).toLocaleDateString() %></div>
+                                <div class="fw-bold text-dark"><%= formatISTTime(e.createdAt, { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %> IST</div>
+                                <div><%= formatISTDate(e.createdAt) %></div>
                             </td>
 
                             <td class="fw-extrabold font-mono text-dark">

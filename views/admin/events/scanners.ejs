@@ -87,7 +87,7 @@
 
                             <td>
                                 <div class="fs-8 text-muted">
-                                    <%= s.lastActiveTime ? new Date(s.lastActiveTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Never' %>
+                                    <%= s.lastActiveTime ? formatISTTime(s.lastActiveTime) + ' IST' : 'Never' %>
                                 </div>
                             </td>
 

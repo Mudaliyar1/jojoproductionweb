@@ -77,8 +77,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="eventDate" class="form-label fw-bold">Event Date</label>
-                        <input type="date" class="form-control rounded-3" id="eventDate" name="eventDate" value="<%= new Date(event.eventDate).toISOString().split('T')[0] %>" required>
+                        <label for="eventDate" class="form-label fw-bold">Event Date (IST)</label>
+                        <input type="date" class="form-control rounded-3" id="eventDate" name="eventDate" value="<%= formatISTInputDate(event.eventDate) %>" required>
                     </div>
 
                     <div class="col-md-6">

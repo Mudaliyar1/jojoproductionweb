@@ -108,7 +108,7 @@
                             </td>
 
                             <td>
-                                <div class="fw-semibold text-dark"><%= new Date(e.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                                <div class="fw-semibold text-dark"><%= formatISTDate(e.eventDate, { month: 'short', day: 'numeric', year: 'numeric' }) %> (<%= e.eventTime %> IST)</div>
                                 <div class="fs-8 text-muted"><i class="fas fa-map-marker-alt me-1"></i><%= e.venue %></div>
                             </td>
 

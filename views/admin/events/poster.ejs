@@ -152,7 +152,7 @@
         <h1 class="poster-title"><%= event.name %></h1>
         
         <div class="poster-meta">
-            <i class="far fa-calendar-alt me-1"></i> <%= new Date(event.eventDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %> • <%= event.venue %>
+            <i class="far fa-calendar-alt me-1"></i> <%= formatISTDate(event.eventDate, { month: 'long', day: 'numeric', year: 'numeric' }) %> • <%= event.eventTime %> IST • <%= event.venue %>
         </div>
 
         <div class="scan-instruction-box">
