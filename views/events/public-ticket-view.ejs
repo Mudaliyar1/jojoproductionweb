@@ -192,6 +192,11 @@
                 <div class="px-4 py-2 bg-light text-center border-top text-muted fs-8">
                     <i class="fas fa-shield-alt text-primary me-1"></i> Present this digital pass QR code at the entrance for verification.
                 </div>
+
+                <!-- Made with love badge inside card (appears on PDF) -->
+                <div class="px-4 py-2 bg-white text-center border-top ds-text-sm text-muted" style="font-size: 0.78rem;">
+                    Made with <span style="color: #e25555; font-size: 0.85rem;">❤️</span> by <strong style="color: #111827;">Vijay</strong>
+                </div>
             </div>
         <% }); %>
 
@@ -200,8 +205,13 @@
             <button id="btnMainDownloadPdf" onclick="downloadTicketPDF('<%= booking.bookingId %>', 'ticketPassesContainer', 'btnMainDownloadPdf')" class="ds-btn ds-btn-primary w-100 py-3 mb-2">
                 <i class="fas fa-file-pdf me-2"></i> Download Digital Passes (PDF)
             </button>
-            <div class="ds-text-sm text-muted">
+            <div class="ds-text-sm text-muted mb-3">
                 Click to directly save your ticket pass as a PDF file onto your device.
+            </div>
+
+            <!-- Page footer Made with love badge -->
+            <div class="d-inline-flex align-items-center gap-1 px-3 py-1-5 rounded-pill bg-white border shadow-sm">
+                <span class="fs-8 text-muted fw-bold">Made with <span style="color: #e25555;">❤️</span> by <strong class="text-dark">Vijay</strong></span>
             </div>
         </div>
     </div>
