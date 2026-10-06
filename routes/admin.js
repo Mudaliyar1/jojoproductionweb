@@ -20,10 +20,29 @@ const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
     fileFilter: function (req, file, cb) {
-        if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
-            cb(null, true);
+        const mimetype = (file.mimetype || '').toLowerCase();
+        const originalName = (file.originalname || '').toLowerCase();
+        const ext = path.extname(originalName);
+
+        // 1. REJECT ALL VIDEOS EXPLICITLY
+        if (mimetype.startsWith('video/') || ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.flv', '.wmv', '.3gp'].includes(ext)) {
+            return cb(new Error('Videos are not allowed. Please upload a static image.'));
+        }
+
+        // 2. REJECT GIF EXPLICITLY
+        if (mimetype === 'image/gif' || ext === '.gif') {
+            return cb(new Error('GIF files are not allowed. Please upload PNG, JPEG, WebP, or iOS HEIC/HEIF image.'));
+        }
+
+        // 3. ALLOW ALL IMAGE FORMATS INCLUDING iOS HEIC/HEIF (PNG, JPEG, WebP, HEIC, HEIF, AVIF, BMP, TIFF)
+        const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif', '.avif', '.bmp', '.tiff'];
+        const isImageMime = mimetype.startsWith('image/') || mimetype === 'application/octet-stream';
+        const isAllowedExt = allowedExtensions.includes(ext);
+
+        if (isImageMime && (isAllowedExt || mimetype.startsWith('image/'))) {
+            return cb(null, true);
         } else {
-            cb(new Error('Only image and video files are allowed'));
+            return cb(new Error('Only valid static image files (PNG, JPEG, WebP, iOS HEIC/HEIF, AVIF) are allowed.'));
         }
     },
     limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
